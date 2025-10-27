@@ -1,0 +1,4 @@
+**/.env
+**/settings.json
+/backend/__pycache__
+/backend/models

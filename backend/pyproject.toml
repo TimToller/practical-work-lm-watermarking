@@ -4,10 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
+    "accelerate>=1.11.0",
     "dotenv>=0.9.9",
     "fastapi>=0.119.1",
     "httpx>=0.28.1",
     "llama-cpp-python>=0.2.90",
+    "numba>=0.62.1",
     "numpy>=2.3.4",
     "openai>=2.6.0",
     "pydantic>=2.12.3",

@@ -1,22 +1,3 @@
-# app.py
-# FastAPI service for exp-min sampling watermark (generate + detect)
-# Targets an 8GB M2 MacBook Air using llama.cpp (llama-cpp-python)
-#
-# Notes:
-# - Generation endpoint attempts to use low-level logits from llama.cpp to implement
-#   exp-min sampling; if not available in your llama-cpp-python build, it falls
-#   back to standard sampling and returns a warning.
-# - Detection endpoint is self-contained and fast; includes a pure-NumPy Levenshtein
-#   DP and an optional Cython hook if you decide to compile the original .pyx.
-# - Tokenization uses llama.cpp's built-in tokenizer, so no Hugging Face deps.
-#
-# Quickstart (see full README after this file):
-#   1) Install deps: pip install fastapi uvicorn pydantic llama-cpp-python numpy
-#   2) (Optional) Build llama-cpp with Metal for M2: CMAKE_ARGS="-DGGML_METAL=ON" pip install --force-reinstall --upgrade --no-cache-dir llama-cpp-python
-#   3) Download a small GGUF model (e.g., Phi-2, TinyLlama, Llama 3.2 1B Instruct) in q4_k_m
-#   4) Run: MODEL_PATH=./models/tinyllama-1.1b-chat.Q4_K_M.gguf uvicorn app:app --host 0.0.0.0 --port 8000
-#   5) Test: curl localhost:8000/health
-
 from __future__ import annotations
 
 import math
@@ -28,6 +9,8 @@ from dataclasses import dataclass
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+
+from util.random import RandomGenerator
 
 # ---- llama.cpp integration --------------------------------------------------
 try:
@@ -42,65 +25,6 @@ N_THREADS = int(os.environ.get("N_THREADS", str(os.cpu_count() or 4)))
 # For M2 + Metal builds of llama.cpp, offload all layers: -1
 N_GPU_LAYERS = int(os.environ.get("N_GPU_LAYERS", "-1"))
 TOP_N_PROBS = int(os.environ.get("TOP_N_PROBS", "512"))  # used if we must approximate
-
-
-# ---- RNG: Mersenne Twister (as given) --------------------------------------
-class mersenne_rng(object):
-    def __init__(self, seed=5489):
-        self.state = [0] * 624
-        self.f = 1812433253
-        self.m = 397
-        self.u = 11
-        self.s = 7
-        self.b = 0x9D2C5680
-        self.t = 15
-        self.c = 0xEFC60000
-        self.l = 18
-        self.index = 624
-        self.lower_mask = (1 << 31) - 1
-        self.upper_mask = 1 << 31
-        # init
-        self.state[0] = seed
-        for i in range(1, 624):
-            self.state[i] = self.int_32(
-                self.f * (self.state[i - 1] ^ (self.state[i - 1] >> 30)) + i
-            )
-
-    def twist(self):
-        for i in range(624):
-            temp = self.int_32(
-                (self.state[i] & self.upper_mask)
-                + (self.state[(i + 1) % 624] & self.lower_mask)
-            )
-            temp_shift = temp >> 1
-            if temp % 2 != 0:
-                temp_shift = temp_shift ^ 0x9908B0DF
-            self.state[i] = self.state[(i + self.m) % 624] ^ temp_shift
-        self.index = 0
-
-    def int_32(self, number):
-        return int(0xFFFFFFFF & number)
-
-    def randint(self):
-        if self.index >= 624:
-            self.twist()
-        y = self.state[self.index]
-        y = y ^ (y >> self.u)
-        y = y ^ ((y << self.s) & self.b)
-        y = y ^ ((y << self.t) & self.c)
-        y = y ^ (y >> self.l)
-        self.index += 1
-        return self.int_32(y)
-
-    def rand(self):
-        return self.randint() * (1.0 / 4294967296.0)
-
-    def randperm(self, n):
-        p = list(range(n))
-        for i in range(n - 1, 0, -1):
-            j = self.randint() % i
-            p[i], p[j] = p[j], p[i]
-        return p
 
 
 # ---- Levenshtein cost DP (float cost) --------------------------------------
@@ -174,7 +98,7 @@ def permutation_test(
     n_runs: int = 100,
     gamma: float = 0.0,
 ) -> float:
-    rng = mersenne_rng(key)
+    rng = RandomGenerator(key)
     xi = np.array(
         [rng.rand() for _ in range(n * vocab_size)], dtype=np.float32
     ).reshape(n, vocab_size)
@@ -332,7 +256,7 @@ def generate(req: GenerateRequest):
     V = st.vocab_size
 
     # Build watermark matrix xi
-    rng = mersenne_rng(req.key)
+    rng = RandomGenerator(req.key)
     xi = np.array([rng.rand() for _ in range(req.n * V)], dtype=np.float32).reshape(
         req.n, V
     )

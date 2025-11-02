@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from backend.app.schemas import DetectRequest, DetectResponse
 from backend.app.deps import get_backend
 from backend.model.backend import ModelBackend
-from backend.core.watermark import permutation_test
+from backend.core.detect import permutation_test
 
 router = APIRouter()
 

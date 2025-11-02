@@ -73,3 +73,6 @@ class LlamaCppBackend(ModelBackend):
             prompt=prompt, max_tokens=int(max_tokens), **kwargs
         )
         return comp["choices"][0]["text"]
+
+    def reset(self) -> None:
+        self._llm.reset()

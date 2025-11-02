@@ -28,6 +28,11 @@ def detect_endpoint(req: DetectRequest, llm: ModelBackend = Depends(get_backend)
         gamma=float(req.gamma),
     )
     elapsed = time.time() - t0
-    # for observability; ok to print, but prefer logging in real usage
-    print(f"detect p={pval:.6f} (len={m}) in {elapsed:.2f}s")
-    return DetectResponse(p_value=float(pval), length=m, n=int(req.n), k=k)
+    return DetectResponse(
+        p_value=float(pval),
+        length=m,
+        n=int(req.n),
+        k=k,
+        watermarked=(pval < 0.01),
+        elapsed=elapsed,
+    )

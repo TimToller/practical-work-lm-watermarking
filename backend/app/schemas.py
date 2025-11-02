@@ -38,6 +38,7 @@ class GenerateResponse(BaseModel):
     # Optional vanilla (non-watermarked) comparison
     vanilla_text: str | None = None
     vanilla_token_ids: T.List[int] | None = None
+    elapsed: float
 
 
 class DetectRequest(BaseModel):
@@ -54,3 +55,5 @@ class DetectResponse(BaseModel):
     length: int
     n: int
     k: int
+    watermarked: bool = Field(False, description="True if p_value < 0.01")
+    elapsed: float

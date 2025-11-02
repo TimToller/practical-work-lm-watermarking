@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import typing as T
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
@@ -16,6 +17,30 @@ router = APIRouter()
 
 @router.post("/generate", response_model=GenerateResponse)
 def generate(req: GenerateRequest, llm: ModelBackend = Depends(get_backend)):
+    vanilla_text: str | None = None
+    vanilla_ids: T.List[int] | None = None
+
+    # --- Optional vanilla baseline (distortion-free) ---
+    if req.return_vanilla:
+        vanilla_len = int(req.vanilla_m or req.m)
+        vanilla_text_only = llm.completion(
+            prompt=req.prompt,
+            max_tokens=vanilla_len,
+            temperature=float(req.temperature),
+            top_p=float(req.top_p),
+        )
+        if req.include_prompt:
+            vanilla_text = req.prompt + vanilla_text_only
+        else:
+            vanilla_text = vanilla_text_only
+        try:
+            vanilla_ids = llm.tokenize(vanilla_text)
+        except Exception:
+            vanilla_ids = []
+
+    llm.reset()
+
+    t0 = time.time()
     V = llm.vocab_size
 
     # Build watermark matrix xi
@@ -93,6 +118,8 @@ def generate(req: GenerateRequest, llm: ModelBackend = Depends(get_backend)):
             # fallback: let backend refresh internal state via zero-token completion
             llm.completion(llm.detokenize(token_ids), max_tokens=0)
 
+    llm.reset()
+
     # --- Assemble watermarked text ---
     if req.include_prompt:
         wm_text = llm.detokenize(token_ids)
@@ -102,27 +129,7 @@ def generate(req: GenerateRequest, llm: ModelBackend = Depends(get_backend)):
         wm_text = llm.detokenize(cont_tokens)
         wm_tokens_out = cont_tokens
 
-    vanilla_text: str | None = None
-    vanilla_ids: T.List[int] | None = None
-
-    # --- Optional vanilla baseline (distortion-free) ---
-    if req.return_vanilla:
-        vanilla_len = int(req.vanilla_m or req.m)
-        vanilla_text_only = llm.completion(
-            prompt=req.prompt,
-            max_tokens=vanilla_len,
-            temperature=float(req.temperature),
-            top_p=float(req.top_p),
-        )
-        if req.include_prompt:
-            vanilla_text = req.prompt + vanilla_text_only
-        else:
-            vanilla_text = vanilla_text_only
-        try:
-            vanilla_ids = llm.tokenize(vanilla_text)
-        except Exception:
-            vanilla_ids = []
-
+    elapsed = time.time() - t0
     return GenerateResponse(
         text=wm_text,
         token_ids=wm_tokens_out,
@@ -130,4 +137,5 @@ def generate(req: GenerateRequest, llm: ModelBackend = Depends(get_backend)):
         warning=warning,
         vanilla_text=vanilla_text,
         vanilla_token_ids=vanilla_ids,
+        elapsed=elapsed,
     )

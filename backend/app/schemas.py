@@ -47,7 +47,7 @@ class DetectRequest(BaseModel):
     key: int = 42
     k: int | None = None
     gamma: float = 0.0
-    n_runs: int = 100
+    n_runs: int = 150
 
 
 class DetectResponse(BaseModel):

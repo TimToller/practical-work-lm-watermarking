@@ -49,25 +49,3 @@ def detect_stat(
         if val < best:
             best = val
     return best
-
-
-def permutation_test(
-    tokens: np.ndarray,
-    key: int,
-    n: int,
-    k: int,
-    vocab_size: int,
-    n_runs: int = 100,
-    gamma: float = 0.0,
-) -> float:
-    rng = RandomGenerator(key)
-    xi = np.array(
-        [rng.rand() for _ in range(n * vocab_size)], dtype=np.float32
-    ).reshape(n, vocab_size)
-    test_result = detect_stat(tokens, n, k, xi, gamma=gamma)
-    p = 0
-    for _ in range(n_runs):
-        xi_alt = np.random.rand(n, vocab_size).astype(np.float32)
-        null = detect_stat(tokens, n, k, xi_alt, gamma=gamma)
-        p += 1 if null <= test_result else 0
-    return (p + 1.0) / (n_runs + 1.0)

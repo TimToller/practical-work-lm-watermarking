@@ -74,7 +74,7 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
     # Null runs with running estimate
     p = 0
     # every = max(1, n_runs // 50)
-    every = 1
+    every = 5
     for i in range(1, n_runs + 1):
         xi_alt = np.random.rand(n, vocab_size).astype(np.float32)
         null = detect_stat(tokens, n, k, xi_alt, gamma=gamma)

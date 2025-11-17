@@ -366,7 +366,7 @@ const App: React.FC = () => {
 		return (
 			<div className="rounded border border-slate-700 bg-slate-900/90 px-2 py-1 text-[11px] text-slate-100">
 				<div className="text-slate-300">run {label}</div>
-				<div className="font-mono">p-hat: {Number(pEntry.value).toExponential(3)}</div>
+				<div className="font-mono">p-hat: {Number(pEntry.value).toFixed(3)}</div>
 			</div>
 		);
 	};
@@ -801,7 +801,7 @@ const App: React.FC = () => {
 															}}
 														/>
 														<YAxis
-															domain={[0, 0.5]}
+															dataKey="pHat"
 															tick={{ fontSize: 11 }}
 															label={{
 																value: "p-hat",

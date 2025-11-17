@@ -47,7 +47,7 @@ class DetectRequest(BaseModel):
     key: int = 42
     k: int | None = None
     gamma: float = 0.0
-    n_runs: int = 150
+    n_runs: int = 500
 
 
 class DetectResponse(BaseModel):
@@ -55,5 +55,7 @@ class DetectResponse(BaseModel):
     length: int
     n: int
     k: int
-    watermarked: bool = Field(False, description="True if p_value < 0.01")
+    watermarked: str = Field(
+        "unlikely", description="Watermarked status based on p-value"
+    )
     elapsed: float

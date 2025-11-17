@@ -12,7 +12,6 @@ from backend.app.schemas import GenerateRequest, GenerateResponse
 from backend.app.deps import get_backend
 from backend.model.backend import ModelBackend
 from backend.core.random_util import RandomGenerator
-from backend.core.watermark import exp_min_choose  # ideally also expose an "adjust"
 from backend.util.logging import logger
 
 router = APIRouter()

@@ -93,13 +93,20 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
 
     # Final smoothed p-value
     pval = (p + 1.0) / (n_runs + 1.0)
+
+    watermarked_status = "unlikely"
+    if pval < 0.01:
+        watermarked_status = "very likely"
+    elif pval < 0.05:
+        watermarked_status = "likely"
+
     elapsed = time.time() - t0
     final_payload = DetectResponse(
         p_value=float(pval),
         length=m,
         n=n,
         k=k,
-        watermarked=(pval < 0.01),
+        watermarked=watermarked_status,
         elapsed=elapsed,
     )
     yield {"type": "final", "payload": final_payload.model_dump()}

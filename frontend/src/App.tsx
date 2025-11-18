@@ -143,7 +143,7 @@ const App: React.FC = () => {
 	const [prompt, setPrompt] = useState("How did US states get their names?");
 	const [m, setM] = useState(200);
 	const [n, setN] = useState(50);
-	const [temperature, setTemperature] = useState(1);
+	const [temperature, setTemperature] = useState(0.95);
 	const [topP, setTopP] = useState(1);
 	const [includePrompt, setIncludePrompt] = useState(false);
 	const [returnVanilla, setReturnVanilla] = useState(false);
@@ -371,21 +371,14 @@ const App: React.FC = () => {
 		);
 	};
 
-	const joinedGeneratedText = generatedTokens.map((t) => t.text).join("");
-
-	const effectiveText = finalGenerate?.text ?? (includePrompt ? prompt + joinedGeneratedText : joinedGeneratedText);
-
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+		<div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
 			<div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 lg:px-6">
 				{/* Header */}
 				<header className="mb-6 flex items-center justify-between gap-3">
 					<div className="flex items-center gap-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-800 shadow-lg">
-							<Sparkles className="h-5 w-5" />
-						</div>
 						<div>
-							<h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Watermarked LLM Playground</h1>
+							<h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Langauge model watermarking</h1>
 						</div>
 					</div>
 				</header>
@@ -416,8 +409,9 @@ const App: React.FC = () => {
 									<CardHeader className="pb-3">
 										<CardTitle className="flex items-center gap-2 text-base">
 											<Sparkles className="h-4 w-4 text-amber-400" />
-											Streaming generation
+											Generate
 										</CardTitle>
+										<CardDescription>Generate a watermarked text</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="space-y-2">
@@ -467,7 +461,7 @@ const App: React.FC = () => {
 										</div>
 
 										<div className="grid gap-3 sm:grid-cols-3">
-											{/* <div className="space-y-1.5">
+											<div className="space-y-1.5">
 												<Label htmlFor="temperature">Temperature</Label>
 												<Input
 													id="temperature"
@@ -478,7 +472,7 @@ const App: React.FC = () => {
 													className="border-slate-700 bg-slate-900 text-sm"
 												/>
 											</div>
-											<div className="space-y-1.5">
+											{/* <div className="space-y-1.5">
 												<Label htmlFor="topP">Top-p</Label>
 												<Input
 													id="topP"

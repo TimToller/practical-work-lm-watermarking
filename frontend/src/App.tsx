@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRightCircle, BarChart3, Copy, Cpu, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowRightCircle, BarChart3, Copy, Cpu, PlayCircle, Shuffle, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipProps } from "recharts";
+import { getPrompt } from "./lib/prompt";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ?? "http://localhost:8000";
 
@@ -194,6 +195,10 @@ const App: React.FC = () => {
 		if (!fullGeneratedText) return;
 		setDetectText(fullGeneratedText);
 		setActiveTab("detect");
+	};
+
+	const shufflePrompt = () => {
+		setPrompt(getPrompt());
 	};
 
 	// Load model info
@@ -415,6 +420,15 @@ const App: React.FC = () => {
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="space-y-2">
+											<Button
+												variant="outline"
+												size="icon"
+												className="h-7 w-7 border-slate-700 bg-slate-900"
+												onClick={shufflePrompt}
+												disabled={!fullGeneratedText}>
+												<Shuffle className="h-3 w-3" />
+											</Button>
+
 											<Label htmlFor="prompt">Prompt</Label>
 											<Textarea
 												id="prompt"

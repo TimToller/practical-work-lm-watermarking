@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.4.29)  15 DEC 2025 22:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.4.29)  15 DEC 2025 23:02
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1432,35 +1432,35 @@ Package tocbasic Info: setting babel extension for `lol' on input line 172.
 \scr@dte@lstlisting@maxnumwidth=\skip130
 
 
-LaTeX Font Info:    Trying to load font information for T1+phv on input line 215.
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 214.
 (/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/up' undefined
-(Font)              using `OT1/cmr/m/n' instead on input line 215.
+(Font)              using `OT1/cmr/m/n' instead on input line 214.
 
-LaTeX Font Info:    Trying to load font information for U+eur on input line 215.
+LaTeX Font Info:    Trying to load font information for U+eur on input line 214.
 (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/ueur.fd
 File: ueur.fd 2013/01/14 v3.01 Euler Roman
 )
-LaTeX Font Info:    Trying to load font information for U+euf on input line 215.
+LaTeX Font Info:    Trying to load font information for U+euf on input line 214.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/ueuf.fd
 File: ueuf.fd 2013/01/14 v3.01 Euler Fraktur
 )
-LaTeX Font Info:    Trying to load font information for U+eus on input line 215.
+LaTeX Font Info:    Trying to load font information for U+eus on input line 214.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/ueus.fd
 File: ueus.fd 2013/01/14 v3.01 Euler Script
 )
-LaTeX Font Info:    Trying to load font information for U+euex on input line 215.
+LaTeX Font Info:    Trying to load font information for U+euex on input line 214.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/ueuex.fd
 File: ueuex.fd 2013/01/14 v3.01 Euler extra symbols
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 215.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 214.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 215.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 214.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}
@@ -1473,16 +1473,6 @@ Underfull \hbox (badness 10000) detected at line 3
 \T1/phv/b/n/10 1. 
  []
 
-
-Underfull \hbox (badness 10000) detected at line 4
-\T1/phv/b/n/10 2. 
- []
-
-
-Underfull \hbox (badness 10000) detected at line 5
-\T1/phv/b/n/10 3. 
- []
-
 )
 \tf@toc=\write5
 \openout5 = `main-seminarreport.toc'.
@@ -1493,31 +1483,21 @@ Underfull \hbox (badness 10000) detected at line 5
 
 
 
-]
+] (././00-abstract.tex)
 
 [3
 
 
-{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
-<images/jku_learningcenter.jpg, id=67, 390.258pt x 260.172pt>
-File: images/jku_learningcenter.jpg Graphic file (type jpg)
-<use images/jku_learningcenter.jpg>
-Package pdftex.def Info: images/jku_learningcenter.jpg  used on input line 281.
-(pdftex.def)             Requested size: 384.11229pt x 256.07837pt.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/inconsolata/t1zi4.fd)
-
-[4
-
-
- <./images/jku_learningcenter.jpg>]
-
-[5{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}]
+{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}] (././01-introduction.tex)
 
 (/usr/local/texlive/2025/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 ) (/usr/local/texlive/2025/texmf-dist/tex/generic/stringenc/se-utf8.def
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
-) [6] (./main-seminarreport.aux)
+) [4
+
+
+] (./main-seminarreport.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1531,18 +1511,18 @@ Package logreq Info: Writing requests to 'main-seminarreport.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 51872 strings out of 473190
- 1131434 string characters out of 5715800
- 2131596 words of memory out of 5000000
- 74368 multiletter control sequences out of 15000+600000
- 591919 words of font info for 80 fonts, out of 8000000 for 9000
+ 51769 strings out of 473190
+ 1128921 string characters out of 5715800
+ 2125883 words of memory out of 5000000
+ 74279 multiletter control sequences out of 15000+600000
+ 587943 words of font info for 74 fonts, out of 8000000 for 9000
  1143 hyphenation exceptions out of 8191
- 108i,27n,131p,10964b,2465s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfcc1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm0700.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on main-seminarreport.pdf (6 pages, 1079465 bytes).
+ 108i,26n,131p,10964b,2465s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
+Output written on main-seminarreport.pdf (4 pages, 67907 bytes).
 PDF statistics:
- 172 PDF objects out of 1000 (max. 8388607)
- 134 compressed objects within 2 object streams
- 25 named destinations out of 1000 (max. 500000)
- 108 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 98 PDF objects out of 1000 (max. 8388607)
+ 74 compressed objects within 1 object stream
+ 14 named destinations out of 1000 (max. 500000)
+ 79 words of extra memory for PDF output out of 10000 (max. 10000000)
 

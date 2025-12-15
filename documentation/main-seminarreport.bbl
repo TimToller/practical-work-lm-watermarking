@@ -19,175 +19,30 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global/global}
-    \entry{bib:2021-hoeller-iiwas}{inproceedings}{}{}
-      \name{author}{3}{}{%
-        {{hash=087cb70d5fec5df578d49a99d78f1c6b}{%
-           family={Höller},
-           familyi={H\bibinitperiod},
-           given={Tobias},
-           giveni={T\bibinitperiod}}}%
-        {{hash=56cb2528b0f939c65e711bf3a83a092b}{%
-           family={Roland},
-           familyi={R\bibinitperiod},
-           given={Michael},
-           giveni={M\bibinitperiod}}}%
-        {{hash=69e3242405c06e1342186a7e4ae503f3}{%
-           family={Mayrhofer},
-           familyi={M\bibinitperiod},
-           given={René},
-           giveni={R\bibinitperiod}}}%
-      }
-      \list{location}{1}{%
-        {Linz, Austria}%
-      }
-      \list{publisher}{1}{%
-        {ACM}%
-      }
-      \strng{namehash}{1b4b074b21dd385cfe1f3578bbdb592b}
-      \strng{fullhash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{fullhashraw}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{bibnamehash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{authorbibnamehash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{authornamehash}{1b4b074b21dd385cfe1f3578bbdb592b}
-      \strng{authorfullhash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{authorfullhashraw}{618edc1c6c893b4d47003fb4c314a53e}
-      \field{extraname}{1}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{The 23rd International Conference on Information Integration and Web Intelligence (iiWAS2021)}
-      \field{month}{11}
-      \field{numpages}{10}
-      \field{title}{{Analyzing inconsistencies in the Tor consensus}}
-      \field{year}{2021}
-      \verb{doi}
-      \verb 10.1145/3487664.3487793
-      \endverb
-    \endentry
-    \entry{bib:2021-hoeller-foci}{inproceedings}{}{}
-      \name{author}{3}{}{%
-        {{hash=087cb70d5fec5df578d49a99d78f1c6b}{%
-           family={Höller},
-           familyi={H\bibinitperiod},
-           given={Tobias},
-           giveni={T\bibinitperiod}}}%
-        {{hash=56cb2528b0f939c65e711bf3a83a092b}{%
-           family={Roland},
-           familyi={R\bibinitperiod},
-           given={Michael},
-           giveni={M\bibinitperiod}}}%
-        {{hash=69e3242405c06e1342186a7e4ae503f3}{%
-           family={Mayrhofer},
-           familyi={M\bibinitperiod},
-           given={René},
-           giveni={R\bibinitperiod}}}%
-      }
-      \list{location}{1}{%
-        {Virtual}%
-      }
-      \list{publisher}{1}{%
-        {ACM}%
-      }
-      \strng{namehash}{1b4b074b21dd385cfe1f3578bbdb592b}
-      \strng{fullhash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{fullhashraw}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{bibnamehash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{authorbibnamehash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{authornamehash}{1b4b074b21dd385cfe1f3578bbdb592b}
-      \strng{authorfullhash}{618edc1c6c893b4d47003fb4c314a53e}
-      \strng{authorfullhashraw}{618edc1c6c893b4d47003fb4c314a53e}
-      \field{extraname}{2}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{Proceedings of the ACM SIGCOMM 2021 Workshop on Free and Open Communications on the Internet (FOCI '21)}
-      \field{month}{8}
-      \field{title}{{On the state of V3 onion services}}
-      \field{year}{2021}
-      \field{pages}{50\bibrangedash 56}
-      \range{pages}{7}
-      \verb{doi}
-      \verb 10.1145/3473604.3474565
-      \endverb
-    \endentry
-    \entry{bib:2015-roland-thesis-book}{book}{}{}
+    \entry{toller2025codebase}{misc}{}{}
       \name{author}{1}{}{%
-        {{hash=56cb2528b0f939c65e711bf3a83a092b}{%
-           family={Roland},
-           familyi={R\bibinitperiod},
-           given={Michael},
-           giveni={M\bibinitperiod}}}%
+        {{hash=453e49227f5847528d25a75dd0869fc5}{%
+           family={Toller},
+           familyi={T\bibinitperiod},
+           given={Tim},
+           giveni={T\bibinitperiod}}}%
       }
-      \list{location}{1}{%
-        {Cham}%
-      }
-      \list{publisher}{1}{%
-        {Springer}%
-      }
-      \strng{namehash}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{fullhash}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{fullhashraw}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{bibnamehash}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{authorbibnamehash}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{authornamehash}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{authorfullhash}{56cb2528b0f939c65e711bf3a83a092b}
-      \strng{authorfullhashraw}{56cb2528b0f939c65e711bf3a83a092b}
-      \field{sortinit}{R}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \strng{namehash}{453e49227f5847528d25a75dd0869fc5}
+      \strng{fullhash}{453e49227f5847528d25a75dd0869fc5}
+      \strng{fullhashraw}{453e49227f5847528d25a75dd0869fc5}
+      \strng{bibnamehash}{453e49227f5847528d25a75dd0869fc5}
+      \strng{authorbibnamehash}{453e49227f5847528d25a75dd0869fc5}
+      \strng{authornamehash}{453e49227f5847528d25a75dd0869fc5}
+      \strng{authorfullhash}{453e49227f5847528d25a75dd0869fc5}
+      \strng{authorfullhashraw}{453e49227f5847528d25a75dd0869fc5}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{isbn}{978-3-319-15487-9}
-      \field{month}{1}
-      \field{series}{T-Labs Series in Telecommunication Services}
-      \field{title}{{Security Issues in Mobile NFC Devices}}
-      \field{year}{2015}
-      \verb{doi}
-      \verb 10.1007/978-3-319-15488-6
-      \endverb
-    \endentry
-    \entry{bib:2013-roland-woot}{inproceedings}{}{}
-      \name{author}{2}{}{%
-        {{hash=56cb2528b0f939c65e711bf3a83a092b}{%
-           family={Roland},
-           familyi={R\bibinitperiod},
-           given={Michael},
-           giveni={M\bibinitperiod}}}%
-        {{hash=f05d60c0d49caa7faf082e1640414742}{%
-           family={Langer},
-           familyi={L\bibinitperiod},
-           given={Josef},
-           giveni={J\bibinitperiod}}}%
-      }
-      \list{location}{1}{%
-        {Washington, DC, USA}%
-      }
-      \list{publisher}{1}{%
-        {USENIX}%
-      }
-      \strng{namehash}{748dc6633e0b753293afb974732986af}
-      \strng{fullhash}{748dc6633e0b753293afb974732986af}
-      \strng{fullhashraw}{748dc6633e0b753293afb974732986af}
-      \strng{bibnamehash}{748dc6633e0b753293afb974732986af}
-      \strng{authorbibnamehash}{748dc6633e0b753293afb974732986af}
-      \strng{authornamehash}{748dc6633e0b753293afb974732986af}
-      \strng{authorfullhash}{748dc6633e0b753293afb974732986af}
-      \strng{authorfullhashraw}{748dc6633e0b753293afb974732986af}
-      \field{sortinit}{R}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{7th USENIX Workshop on Offensive Technologies}
-      \field{month}{8}
-      \field{title}{{Cloning Credit Cards: A combined pre-play and downgrade attack on EMV Contactless}}
-      \field{year}{2013}
-      \verb{urlraw}
-      \verb https://www.usenix.org/conference/woot13/workshop-program/presentation/roland
-      \endverb
-      \verb{url}
-      \verb https://www.usenix.org/conference/woot13/workshop-program/presentation/roland
-      \endverb
+      \field{howpublished}{In repository GitHub}
+      \field{note}{Based on the code of Kuditipudi et al.\ (2023), \url{https://github.com/jthickstun/watermark/}, with additional modifications}
+      \field{title}{{Robust Distortion-free Watermarking for Language Models:} Implementation and Extensions}
+      \field{year}{2025}
     \endentry
   \enddatalist
 \endrefsection

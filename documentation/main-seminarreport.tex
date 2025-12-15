@@ -212,50 +212,59 @@
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%% Add a table of contents
-%% 
-
-%% Make sure to start the table of contents on a new odd page (odd is only relevant in twoside layout)
 \cleardoubleoddpage
 %% Print the table of contents
 \tableofcontents
 
-%% Make sure to start the list of acronyms on a new odd page (odd is only relevant in twoside layout)
-%\cleardoubleoddpage
-%% Include list of acronyms (optional and often not necessary)
-%\import{./}{acronyms}
+\section{Introduction}
+\subsection{Motivation and Problem Statement}
+\subsection{Project Goals and Scope}
 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Background: LLM Watermarking and Exp-Min}
+\subsection{What Text Watermarking Is (Generation + Detection)}
+\subsection{Exp-Min Watermarking: Idea and Properties}
+\subsection{Detection Principle: Test Statistic and p-value Interpretation}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%% Abstract: Instead of an abstract on the title page (see \abstract{...}), you
-%% sometimes want to add an abstract as its own unnumbered section.
-%% 
+\section{System Overview}
+\subsection{Architecture and Components (Backend, Core, Frontend)}
+\subsection{End-to-End Workflows (Generate / Detect, Streaming vs. Non-Streaming)}
 
-%% (Optionally) let the abstract start on a new odd page (odd is only relevant in twoside layout)
-\cleardoubleoddpage
+\section{Backend Implementation (FastAPI)}
+\subsection{Project Structure and Entry Points}
+\subsection{API Design}
+\subsubsection{Health and Model Info}
+\subsubsection{Generation Endpoints (\texttt{/generate}, \texttt{/generate/stream})}
+\subsubsection{Detection Endpoints (\texttt{/detect}, \texttt{/detect/stream})}
+\subsubsection{Corruption Endpoints (\texttt{/corrupt})}
+\subsection{Configuration and Runtime Settings}
+\subsection{Model Backend Integration (llama.cpp / \texttt{llama-cpp-python})}
+\subsection{Watermark Core Integration (Generation Path)}
+\subsection{Detection Core Integration (Detection Path)}
 
-\addsec{Abstract}
+\section{Watermarking and Detection Core}
+\subsection{Watermark Parameters and their roles}
+\subsection{Generation Algorithm (High-Level Pseudocode)}
+\subsection{Detection Algorithm (High-Level Pseudocode)}
 
-\import{./}{00-abstract}
+\section{Frontend Implementation (Vite + React)}
+\subsection{UI Structure and Main Views}
+\subsection{API Client and Data Flow}
+\subsection{Streaming Handling and Result Visualization}
+\subsection{User Inputs and Validation (Practical Defaults)}
 
+\section{Setup and Usage}
+\subsection{Requirements and Installation (Python/Node)}
+\subsection{Running Backend and Frontend Locally}
+\subsection{Example Requests and Expected Outputs}
 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Limitations and Future Work}
+\subsection{When Detection Fails (Short Texts, Edits, Paraphrasing)}
+\subsection{Model/Backend Constraints (Need Logits, Local Performance)}
+\subsection{Possible Extensions (Evaluation Suite, Robustness Tests, Multi-Model Support)}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%% Add your report sections ...
-%% 
-
-%% (Optionally) let the main sections start on a new odd page (odd is only relevant in twoside layout)
-\cleardoubleoddpage
-
-\import{./}{01-introduction}
+\section{Conclusion}
+\subsection{Summary of Results}
+\subsection{Outlook}
 
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

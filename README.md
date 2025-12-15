@@ -26,24 +26,19 @@ Requirements
 - Package managers:
   - Preferred: `uv` for Python and `pnpm` for Node (a `pnpm-lock.yaml` is present)
   - Alternatives: `pip` and `npm`
-- Model file: a GGUF model on disk (examples in `backend/models/`). Default path is `./backend/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf`.
+- Model file: a GGUF model on disk (examples in `backend/models/`). Default path is `./backend/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf`. Can be downloaded [here](https://huggingface.co/hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF/resolve/main/llama-3.2-3b-instruct-q4_k_m.gguf?download=true)
 
 Quick Start
 
 Backend (uv + uvicorn)
 
 ```bash
-uv pip install -e ./backend
-uv run uvicorn backend.app.main:app --reload --port 8000
-```
-
-Backend (pip + uvicorn)
-
-```bash
-python -m venv .venv
+cd backend
+uv venv
 source .venv/bin/activate
-pip install -e ./backend
-uvicorn backend.app.main:app --reload --port 8000
+uv sync
+cd ..
+uv run uvicorn backend.app.main:app --reload --port 8000
 ```
 
 Frontend (pnpm)
@@ -52,14 +47,6 @@ Frontend (pnpm)
 cd frontend
 pnpm install
 pnpm dev
-```
-
-Frontend (npm)
-
-```bash
-cd frontend
-npm install
-npm run dev
 ```
 
 By default, the frontend runs on `http://localhost:5173` and the backend on `http://localhost:8000`. CORS is preconfigured for `5173` in the backend.

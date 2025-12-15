@@ -1,5 +1,0 @@
-\babel@toc {english}{}\relax 
-\contentsline {section}{\nonumberline Abstract}{3}{section*.4}%
-\contentsline {section}{\numberline {1}Introduction}{4}{section.1}%
-\contentsline {section}{\nonumberline References}{4}{section*.6}%
-\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

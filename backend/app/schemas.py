@@ -11,9 +11,9 @@ class GenerateRequest(BaseModel):
     top_n: int | None = Field(
         None, description="Top-N to approximate probs if full logits not exposed"
     )
-    include_prompt: bool = Field(
+    include_system_prompt: bool = Field(
         True,
-        description="If false, only return the generated continuation (not the prompt)",
+        description="If True, include the model's system prompt in the generation context",
     )
     # Optional vanilla generation for comparison (distortion-free baseline)
     return_vanilla: bool = Field(

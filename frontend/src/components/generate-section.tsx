@@ -4,7 +4,6 @@ import { API_BASE } from "@/lib/consts";
 import { getPrompt } from "@/lib/prompt";
 import {
 	detectTextSchema,
-	includePromptSchema,
 	keySchema,
 	mSchema,
 	nSchema,
@@ -29,7 +28,6 @@ type GenerateRequestPayload = {
 	n: number;
 	temperature: number;
 	top_p: number;
-	include_prompt: boolean;
 	return_vanilla: boolean;
 	vanilla_m?: number;
 	key: number;
@@ -60,7 +58,6 @@ export default function GenerateSection() {
 	const [m, setM] = useQueryParam("m", mSchema);
 	const [n, setN] = useQueryParam("n", nSchema);
 	const [temperature, setTemperature] = useQueryParam("temperature", temperatureSchema);
-	const [includePrompt, setIncludePrompt] = useQueryParam("includePrompt", includePromptSchema);
 	const [returnVanilla, setReturnVanilla] = useQueryParam("returnVanilla", returnVanillaSchema);
 	const [key, setKey] = useQueryParam("key", keySchema);
 	const [, setActiveTab] = useQueryParam("tab", tabSchema, { replace: true });
@@ -76,11 +73,11 @@ export default function GenerateSection() {
 	const fullGeneratedText = React.useMemo(() => {
 		// Prefer the backend's final text if available and not an error
 		if (finalGenerate?.text && !finalGenerate.error) {
-			return includePrompt ? prompt + finalGenerate.text : finalGenerate.text;
+			return finalGenerate.text;
 		}
 		const continuation = generatedTokens.map((t) => t.text).join("");
-		return includePrompt ? prompt + continuation : continuation;
-	}, [finalGenerate, generatedTokens, includePrompt, prompt]);
+		return continuation;
+	}, [finalGenerate, generatedTokens, prompt]);
 
 	const handleCopyGenerated = async () => {
 		if (!fullGeneratedText) return;
@@ -116,7 +113,6 @@ export default function GenerateSection() {
 			n,
 			temperature,
 			top_p: topP,
-			include_prompt: includePrompt,
 			return_vanilla: returnVanilla,
 			vanilla_m: returnVanilla ? m : undefined,
 			key,
@@ -258,17 +254,6 @@ export default function GenerateSection() {
 					</div>
 
 					<div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-						<div className="flex items-center gap-3 text-xs ">
-							<label className="inline-flex items-center gap-2">
-								<input
-									type="checkbox"
-									className="h-3 w-3 rounded border-slate-600 bg-slate-900"
-									checked={includePrompt}
-									onChange={(e) => setIncludePrompt(e.target.checked)}
-								/>
-								Include prompt in final text
-							</label>
-						</div>
 						<div className="flex flex-wrap items-center gap-3 text-xs">
 							<label className="inline-flex items-center gap-2">
 								<input
@@ -350,12 +335,8 @@ export default function GenerateSection() {
 				</CardHeader>
 				<CardContent>
 					<div className="relative min-h-[140px] rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm leading-relaxed">
-						{includePrompt || generatedTokens.length > 0 ? (
+						{generatedTokens.length > 0 ? (
 							<p className="whitespace-pre-wrap font-mono">
-								{/* Static prompt part, if include_prompt is true */}
-								{includePrompt && <span>{prompt}</span>}
-
-								{/* Animated continuation tokens */}
 								<AnimatePresence initial={false}>
 									{generatedTokens.map((tok) => (
 										<motion.span

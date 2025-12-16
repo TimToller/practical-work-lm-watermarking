@@ -17,6 +17,10 @@ from backend.util.logging import logger
 router = APIRouter()
 
 
+def PROMPT_WRAPPER(prompt):
+    return f"Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{prompt}\n\n### Response:\n"
+
+
 def softmax(x):
     x = x - np.max(x)
     p = np.exp(x, dtype=np.float64)
@@ -67,14 +71,12 @@ def _watermarked_generate_iter(
     if req.return_vanilla:
         vanilla_len = int(req.vanilla_m or req.m)
         vanilla_text_only = llm.completion(
-            prompt=req.prompt,
+            prompt=PROMPT_WRAPPER(req.prompt),
             max_tokens=vanilla_len,
             temperature=float(req.temperature),
             top_p=float(req.top_p),
         )
-        vanilla_text = (
-            req.prompt + vanilla_text_only if req.include_prompt else vanilla_text_only
-        )
+        vanilla_text = vanilla_text_only
         try:
             vanilla_ids = llm.tokenize(vanilla_text)
         except Exception:
@@ -160,13 +162,9 @@ def _watermarked_generate_iter(
 
     llm.reset()
 
-    if req.include_prompt:
-        wm_text = llm.detokenize(token_ids)
-        wm_tokens_out = token_ids
-    else:
-        cont_tokens = token_ids[prompt_offset:]
-        wm_text = llm.detokenize(cont_tokens)
-        wm_tokens_out = cont_tokens
+    cont_tokens = token_ids[prompt_offset:]
+    wm_text = llm.detokenize(cont_tokens)
+    wm_tokens_out = cont_tokens
 
     vanilla_text = llm.detokenize(vanilla_ids) if vanilla_ids is not None else None
     elapsed = time.time() - t0

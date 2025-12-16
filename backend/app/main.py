@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.app.routes import health, model, generate, detect
+from backend.app.routes import health, model, generate, detect, corrupt
 from fastapi.middleware.cors import CORSMiddleware
 
 origins = [
@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
     app.include_router(model.router)
     app.include_router(generate.router)
     app.include_router(detect.router)
+    app.include_router(corrupt.router)
     return app
 
 

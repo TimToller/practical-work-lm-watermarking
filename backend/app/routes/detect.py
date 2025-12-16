@@ -1,22 +1,7 @@
-import json
-import time
-import numpy as np
 from fastapi import APIRouter, Depends
-
-from backend.app.schemas import DetectRequest, DetectResponse
-from backend.app.deps import get_backend
-from backend.core.random_util import RandomGenerator
-from backend.model.backend import ModelBackend
-from backend.core.detect import detect_stat
-
-router = APIRouter()
-
-# NOTE: relies on your existing:
-# - _sse_format(event: dict) -> str
-# - router = APIRouter() in this module
-
 import time
 import numpy as np
+import json
 from typing import Iterator, Dict, Any
 from fastapi import Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -26,6 +11,8 @@ from backend.app.deps import get_backend
 from backend.model.backend import ModelBackend
 from backend.core.random_util import RandomGenerator
 from backend.core.detect import detect_stat
+
+router = APIRouter()
 
 
 def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, Any]]:

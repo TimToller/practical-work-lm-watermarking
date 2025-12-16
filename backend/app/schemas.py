@@ -59,3 +59,24 @@ class DetectResponse(BaseModel):
         "unlikely", description="Watermarked status based on p-value"
     )
     elapsed: float
+
+
+class CorruptRequest(BaseModel):
+    text: str
+    corruption_goal: float = Field(
+        0.2,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Target corruption rate in [0,1]. The endpoint will corrupt the text by back-translation "
+            "of a subset of sentences until the measured corruption rate roughly reaches this goal."
+        ),
+    )
+    seed: int | None = Field(None, description="Random seed for reproducibility")
+
+
+class CorruptResponse(BaseModel):
+    corrupted_text: str
+    corruption_rate: float
+    corruption_offset: float
+    elapsed: float

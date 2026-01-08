@@ -1,7 +1,7 @@
-import { useQueryParam } from "@/hooks/useQueryParam";
 import { parseSSEChunk } from "@/lib/api";
 import { API_BASE } from "@/lib/consts";
-import { detectTextSchema, keySchema, nRunsSchema, nSchema } from "@/lib/states";
+import { detectSettings } from "@/lib/store";
+import { useAtom } from "jotai";
 import { BarChart3, PlayCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -64,11 +64,8 @@ type PValuePoint = {
 };
 
 export default function DetectSection() {
-	const [detectText, setDetectText] = useQueryParam("detectText", detectTextSchema);
-	const [detectN, setDetectN] = useQueryParam("n", nSchema);
-
-	const [detectNRuns, setDetectNRuns] = useQueryParam("nRuns", nRunsSchema);
-	const [detectKey, setDetectKey] = useQueryParam("key", keySchema);
+	const [settings, setSettings] = useAtom(detectSettings);
+	const { text: detectText, n: detectN, nRuns: detectNRuns, key: detectKey } = settings;
 
 	const [isDetecting, setIsDetecting] = useState(false);
 	const [detectInit, setDetectInit] = useState<DetectInitEvent | null>(null);
@@ -140,8 +137,9 @@ export default function DetectSection() {
 					}
 				}
 			}
-		} catch (e: any) {
-			setDetectError(e?.message ?? "Streaming failed");
+		} catch (e: unknown) {
+			const message = e instanceof Error ? e.message : "Streaming failed";
+			setDetectError(message);
 		} finally {
 			setIsDetecting(false);
 		}
@@ -179,7 +177,7 @@ export default function DetectSection() {
 						<Textarea
 							id="detectText"
 							value={detectText}
-							onChange={(e) => setDetectText(e.target.value)}
+							onChange={(e) => setSettings((prev) => ({ ...prev, text: e.target.value }))}
 							className="min-h-[120px] resize-y border-slate-700 bg-slate-900"
 							placeholder="Paste generated text here..."
 						/>
@@ -192,7 +190,7 @@ export default function DetectSection() {
 								id="detectN"
 								type="number"
 								value={detectN}
-								onChange={(e) => setDetectN(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, n: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 							/>
 						</div>
@@ -215,7 +213,7 @@ export default function DetectSection() {
 								id="detectNRuns"
 								type="number"
 								value={detectNRuns}
-								onChange={(e) => setDetectNRuns(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, nRuns: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 							/>
 						</div>
@@ -239,7 +237,7 @@ export default function DetectSection() {
 								id="detectKey"
 								type="number"
 								value={detectKey}
-								onChange={(e) => setDetectKey(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, key: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 							/>
 						</div>

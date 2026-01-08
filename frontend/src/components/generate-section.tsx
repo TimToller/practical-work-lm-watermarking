@@ -1,17 +1,8 @@
-import { useQueryParam } from "@/hooks/useQueryParam";
 import { parseSSEChunk } from "@/lib/api";
 import { API_BASE } from "@/lib/consts";
 import { getPrompt } from "@/lib/prompt";
-import {
-	detectTextSchema,
-	keySchema,
-	mSchema,
-	nSchema,
-	promptSchema,
-	returnVanillaSchema,
-	tabSchema,
-	temperatureSchema,
-} from "@/lib/states";
+import { activeTab, detectSettings, generateSettings } from "@/lib/store";
+import { useAtom } from "jotai";
 import { ArrowRightCircle, Copy, PlayCircle, Shuffle, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
@@ -54,16 +45,12 @@ type GenerateTokenEvent = {
 };
 
 export default function GenerateSection() {
-	const [prompt, setPrompt] = useQueryParam("prompt", promptSchema);
-	const [m, setM] = useQueryParam("m", mSchema);
-	const [n, setN] = useQueryParam("n", nSchema);
-	const [temperature, setTemperature] = useQueryParam("temperature", temperatureSchema);
-	const [returnVanilla, setReturnVanilla] = useQueryParam("returnVanilla", returnVanillaSchema);
-	const [key, setKey] = useQueryParam("key", keySchema);
-	const [, setActiveTab] = useQueryParam("tab", tabSchema, { replace: true });
-	const [, setDetectText] = useQueryParam("detectText", detectTextSchema);
+	const [settings, setSettings] = useAtom(generateSettings);
+	const [, setTab] = useAtom(activeTab);
+	const [, setDetect] = useAtom(detectSettings);
 
-	const [topP] = useState(1);
+	const { prompt, maxTokens: m, n, temperature, returnVanillaBaseline: returnVanilla, key, top_p: topP } = settings;
+
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [generatedTokens, setGeneratedTokens] = useState<GenerateTokenEvent[]>([]);
 	const [finalGenerate, setFinalGenerate] = useState<GenerateResponsePayload | null>(null);
@@ -92,12 +79,12 @@ export default function GenerateSection() {
 
 	const handleBringToDetect = () => {
 		if (!fullGeneratedText) return;
-		setDetectText(fullGeneratedText);
-		setActiveTab("detect");
+		setDetect((prev) => ({ ...prev, text: fullGeneratedText }));
+		setTab("detect");
 	};
 
 	const shufflePrompt = () => {
-		setPrompt(getPrompt());
+		setSettings((prev) => ({ ...prev, prompt: getPrompt() }));
 	};
 
 	const handleGenerate = async () => {
@@ -114,7 +101,6 @@ export default function GenerateSection() {
 			temperature,
 			top_p: topP,
 			return_vanilla: returnVanilla,
-			vanilla_m: returnVanilla ? m : undefined,
 			key,
 		};
 
@@ -161,8 +147,9 @@ export default function GenerateSection() {
 					}
 				}
 			}
-		} catch (e: Error) {
-			setGenerateError(e.message ?? "Streaming failed");
+		} catch (e: unknown) {
+			const message = e instanceof Error ? e.message : "Streaming failed";
+			setGenerateError(message);
 		} finally {
 			setIsGenerating(false);
 		}
@@ -187,7 +174,7 @@ export default function GenerateSection() {
 						<Textarea
 							id="prompt"
 							value={prompt}
-							onChange={(e) => setPrompt(e.target.value)}
+							onChange={(e) => setSettings((prev) => ({ ...prev, prompt: e.target.value }))}
 							className="min-h-[120px] resize-y border-slate-700 bg-slate-900"
 							placeholder="Ask the model anything..."
 						/>
@@ -200,7 +187,7 @@ export default function GenerateSection() {
 								id="m"
 								type="number"
 								value={m}
-								onChange={(e) => setM(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, maxTokens: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 								min={1}
 							/>
@@ -211,7 +198,7 @@ export default function GenerateSection() {
 								id="n"
 								type="number"
 								value={n}
-								onChange={(e) => setN(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, n: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 								min={1}
 							/>
@@ -222,7 +209,7 @@ export default function GenerateSection() {
 								id="key"
 								type="number"
 								value={key}
-								onChange={(e) => setKey(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, key: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 							/>
 						</div>
@@ -236,7 +223,7 @@ export default function GenerateSection() {
 								type="number"
 								step="0.01"
 								value={temperature}
-								onChange={(e) => setTemperature(Number(e.target.value) || 0)}
+								onChange={(e) => setSettings((prev) => ({ ...prev, temperature: Number(e.target.value) || 0 }))}
 								className="border-slate-700 bg-slate-900 text-sm"
 							/>
 						</div>
@@ -260,7 +247,7 @@ export default function GenerateSection() {
 									type="checkbox"
 									className="h-3 w-3 rounded border-slate-600 bg-slate-900"
 									checked={returnVanilla}
-									onChange={(e) => setReturnVanilla(e.target.checked)}
+									onChange={(e) => setSettings((prev) => ({ ...prev, returnVanillaBaseline: e.target.checked }))}
 								/>
 								Return vanilla baseline
 							</label>

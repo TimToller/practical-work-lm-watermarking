@@ -12,10 +12,10 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Exp-Min Watermark API (llama.cpp)", version="1.0.0")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,  # or ["*"] for all origins (dev only)
+        allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["*"],  # allow POST, GET, OPTIONS, etc.
-        allow_headers=["*"],  # allow all request headers
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     app.include_router(health.router)

@@ -4,7 +4,7 @@ import { detectSettings } from "@/lib/store";
 import { useAtom } from "jotai";
 import { BarChart3, PlayCircle } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipProps } from "recharts";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -160,6 +160,11 @@ export default function DetectSection() {
 			</div>
 		);
 	};
+
+	const currentP = useMemo(() => {
+		if (detectProgress.length === 0) return 1;
+		return detectProgress[detectProgress.length - 1].pHat;
+	}, [detectProgress]);
 
 	return (
 		<TabsContent value="detect" className="mt-4 space-y-4">
@@ -330,7 +335,13 @@ export default function DetectSection() {
 									/>
 									<Tooltip content={renderPValueTooltip} />
 
-									<Line type="monotone" dataKey="pHat" dot={false} strokeWidth={2} />
+									<Line
+										type="monotone"
+										dataKey="pHat"
+										dot={false}
+										strokeWidth={2}
+										stroke={currentP < 0.01 ? "#4ade80" : currentP < 0.05 ? "#facc15" : "#f87171"}
+									/>
 									<Line
 										type="monotone"
 										dataKey={() => 0.01}

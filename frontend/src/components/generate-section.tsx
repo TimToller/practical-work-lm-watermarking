@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import { ArrowRightCircle, Copy, PlayCircle, Shuffle, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -154,6 +155,7 @@ export default function GenerateSection() {
 			setIsGenerating(false);
 		}
 	};
+
 	return (
 		<TabsContent value="generate" className="mt-4 space-y-4">
 			<Card className="border-slate-800 bg-slate-900/60 backdrop-blur">
@@ -360,14 +362,47 @@ export default function GenerateSection() {
 					</div>
 
 					{returnVanilla && finalGenerate?.vanilla_text && !finalGenerate.error && (
-						<div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs">
-							<div className="mb-1 flex items-center justify-between">
-								<span className="font-medium text-slate-200">Vanilla baseline</span>
-							</div>
-							<p className="whitespace-pre-wrap font-mono text-slate-300">{finalGenerate.vanilla_text}</p>
-						</div>
+						<Accordion type="single" collapsible className="w-full">
+							<AccordionItem value="vanilla">
+								<AccordionTrigger>Vanilla baseline</AccordionTrigger>
+								<AccordionContent className="flex flex-col gap-4 text-balance">
+									<p className="whitespace-pre-wrap font-mono text-slate-300">{finalGenerate.vanilla_text}</p>
+								</AccordionContent>
+							</AccordionItem>
+						</Accordion>
 					)}
 				</CardContent>
+			</Card>
+			<Card className="border-slate-800 bg-slate-900/70 backdrop-blur">
+				<CardHeader className="pb-2">
+					<CardTitle className="flex items-center justify-between text-sm">
+						<span>Corrupt Text</span>
+						<div className="flex items-center gap-2">
+							<span className="text-[11px] font-normal text-slate-400">tokens: {generatedTokens.length}</span>
+
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-7 w-7 border-slate-700 bg-slate-900"
+								onClick={handleCopyGenerated}
+								disabled={!fullGeneratedText}>
+								<Copy className="h-3 w-3" />
+							</Button>
+
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-7 w-7 border-slate-700 bg-slate-900"
+								onClick={handleBringToDetect}
+								disabled={!fullGeneratedText}>
+								<ArrowRightCircle className="h-3 w-3" />
+							</Button>
+						</div>
+					</CardTitle>
+
+					{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard ✔</p>}
+				</CardHeader>
+				<CardContent></CardContent>
 			</Card>
 		</TabsContent>
 	);

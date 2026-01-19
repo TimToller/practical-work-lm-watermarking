@@ -14,6 +14,10 @@ from backend.model.backend import ModelBackend
 from backend.core.random_util import RandomGenerator
 from backend.util.logging import logger
 
+from backend.core.xi import xi_u_vector
+import hashlib
+
+
 router = APIRouter()
 
 
@@ -101,13 +105,11 @@ def _watermarked_generate_iter(
     step = 0
     prompt_offset = len(prompt_tokens)
 
-    import hashlib
-
-    h = hashlib.sha256(str(req.key).encode("utf-8") + b":shift").digest()
-    shift0 = int.from_bytes(h[:8], "big") % req.n
+    h = hashlib.sha256((str(req.key) + ":shift").encode("utf-8")).digest()
+    tau = int.from_bytes(h[:8], "big") % req.n
 
     for step in range(m):
-        pos = len(token_ids)
+        row = (tau + step) % req.n
 
         logits = llm.last_logits()
         if logits is None or len(logits) != V:
@@ -122,8 +124,8 @@ def _watermarked_generate_iter(
             top_p=(float(req.top_p) if req.top_p else None),
         )
 
-        row = (shift0 + step) % req.n
-        u = xi[row]
+        u = xi_u_vector(str(req.key), row=row, V=V)
+
         chosen_id = expmin_choose(p, u)
 
         token_ids.append(chosen_id)
@@ -135,12 +137,12 @@ def _watermarked_generate_iter(
             "type": "token",
             "step": step,
             "text": token_text,
-            "vanilla_text": vanilla_text,
             "id": chosen_id,
             "prompt_offset": prompt_offset,
             "total_steps": m,
+            "tau": tau,
+            "row": row,
         }
-        step += 1
 
     llm.reset()
 

@@ -1,10 +1,10 @@
 import { activeTab, detectSettings } from "@/lib/store";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import { useAtom } from "jotai";
 import { ArrowRightCircle, Copy } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import type { GenerateResponsePayload, GenerateTokenEvent } from "./generate-section";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 

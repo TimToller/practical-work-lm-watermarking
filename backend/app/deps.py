@@ -18,6 +18,5 @@ def get_settings() -> Settings:
 
 @lru_cache(maxsize=1)
 def get_backend() -> ModelBackend:
-    # No args → hashable → cache works
     settings = get_settings()
     return LlamaCppBackend(settings)

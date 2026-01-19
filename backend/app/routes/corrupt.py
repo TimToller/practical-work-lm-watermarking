@@ -42,7 +42,6 @@ def _device() -> str:
 
 
 def _model_id(src: str, tgt: str) -> str:
-    # MarianMT / OPUS models
     mapping = {
         ("en", "fr"): "Helsinki-NLP/opus-mt-en-fr",
         ("fr", "en"): "Helsinki-NLP/opus-mt-fr-en",
@@ -80,7 +79,6 @@ def _get_translator(src: str, tgt: str) -> tuple[Any, Any]:
 def _translate(text: str, src: str, tgt: str) -> str:
     tokenizer, model = _get_translator(src, tgt)
 
-    # Conservative cap: Marian models typically have small context windows.
     inputs = tokenizer(
         text,
         return_tensors="pt",
@@ -102,7 +100,6 @@ def _translate(text: str, src: str, tgt: str) -> str:
 
 
 def _corruption_rate(original: str, corrupted: str) -> float:
-    # 0 => identical, 1 => completely different (approx. via SequenceMatcher similarity)
     if original == corrupted:
         return 0.0
     if not original and not corrupted:
@@ -119,10 +116,7 @@ def _corruption_rate(original: str, corrupted: str) -> float:
 
 
 def _split_sentences(text: str) -> list[str]:
-    # Simple, punctuation-based sentence splitter that keeps trailing whitespace.
-    # Examples: "Hi. Bye!" -> ["Hi. ", "Bye!"]
     chunks = re.findall(r"[^.!?]+[.!?]*\s*", text, flags=re.MULTILINE)
-    # Fall back if regex fails oddly
     if not chunks:
         return [text]
     return chunks
@@ -133,10 +127,6 @@ def _back_translate_sentence(sentence: str, variant: int) -> str:
     if not trimmed:
         return sentence
 
-    # Alternate paths to vary corruption slightly.
-    # 0: EN -> FR -> EN
-    # 1: EN -> FR -> RU -> EN
-    # 2: EN -> FR -> RU -> FR -> EN
     paths: list[list[str]] = [
         ["en", "fr", "en"],
         ["en", "fr", "ru", "en"],
@@ -168,8 +158,6 @@ def _corrupt_to_goal(text: str, goal: float, seed: int | None) -> _CorruptionRes
     indices = list(range(n_sentences))
     rng.shuffle(indices)
 
-    # Translate an initial proportion of sentences, then increase until goal is met.
-    # Start with k ≈ goal * n (at least 1).
     initial_k = max(1, int(round(goal * n_sentences)))
     mutated = chunks[:]
 

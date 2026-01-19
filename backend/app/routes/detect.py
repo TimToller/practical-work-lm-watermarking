@@ -16,13 +16,6 @@ router = APIRouter()
 
 
 def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, Any]]:
-    """
-    Stream detection telemetry, then yield a single 'final' with DetectResponse payload.
-    Event types:
-      - 'init'     : input metadata for UI
-      - 'progress' : 'observed' (test_result) then 'null' with running p-hat
-      - 'final'    : DetectResponse (or error wrapped by caller)
-    """
     t0 = time.time()
 
     tokens = np.array(llm.tokenize(req.text), dtype=np.int32)
@@ -34,7 +27,6 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
     gamma = float(req.gamma)
     key = req.key
 
-    # Initial metadata for clients
     yield {
         "type": "init",
         "length": m,
@@ -45,7 +37,6 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
         "gamma": gamma,
     }
 
-    # Observed statistic (deterministic given key)
     rng = RandomGenerator(key)
     xi = np.array(
         [rng.rand() for _ in range(n * vocab_size)], dtype=np.float32
@@ -58,9 +49,7 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
         "runs_completed": 0,
     }
 
-    # Null runs with running estimate
     p = 0
-    # every = max(1, n_runs // 50)
     every = 5
     for i in range(1, n_runs + 1):
         xi_alt = np.random.rand(n, vocab_size).astype(np.float32)
@@ -78,7 +67,6 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
                 "elapsed": time.time() - t0,
             }
 
-    # Final smoothed p-value
     pval = (p + 1.0) / (n_runs + 1.0)
 
     watermarked_status = "unlikely"
@@ -101,7 +89,6 @@ def _detect_iter(req: DetectRequest, llm: ModelBackend) -> Iterator[Dict[str, An
 
 @router.post("/detect", response_model=DetectResponse)
 def detect(req: DetectRequest, llm: ModelBackend = Depends(get_backend)):
-    # Mirror your /generate: consume iterator, return the final payload
     final_dict = None
     for event in _detect_iter(req, llm):
         if event.get("type") == "final":
@@ -122,7 +109,6 @@ def _sse_format(event: Dict[str, Any]) -> str:
 
 @router.post("/detect/stream")
 def detect_stream(req: DetectRequest, llm: ModelBackend = Depends(get_backend)):
-    # Reuse your existing _sse_format (no duplication)
     def event_iter():
         try:
             for event in _detect_iter(req, llm):

@@ -21,20 +21,18 @@ def levenshtein_cost(x: np.ndarray, y: np.ndarray, gamma: float = 0.0) -> float:
     n = x.shape[0]
     m = y.shape[0]
     A = np.empty((n + 1, m + 1), dtype=np.float32)
-    # init
     for i in range(n + 1):
         A[i, 0] = i * gamma
     for j in range(m + 1):
         A[0, j] = j * gamma
-    # DP
     for i in range(1, n + 1):
         xi = x[i - 1]
         for j in range(1, m + 1):
             pj = y[j - 1, xi]
-            cost = math.log(max(1e-20, 1.0 - float(pj)))  # stable log
-            a = A[i - 1, j] + gamma  # deletion
-            b = A[i, j - 1] + gamma  # insertion
-            c = A[i - 1, j - 1] + cost  # substitution cost specific to token-prob
+            cost = math.log(max(1e-20, 1.0 - float(pj)))
+            a = A[i - 1, j] + gamma
+            b = A[i, j - 1] + gamma
+            c = A[i - 1, j - 1] + cost
             A[i, j] = a if a < b else b
             if c < A[i, j]:
                 A[i, j] = c

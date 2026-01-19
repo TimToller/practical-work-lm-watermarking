@@ -82,6 +82,9 @@ API Reference
   - Request body (JSON): `text: string`, `n: number`, `key: number`, `k?: number`, `gamma: number`, `n_runs: number`
   - Response: `{ p_value, length, n, k, watermarked, elapsed }`
 - `POST /detect/stream` → SSE with incremental progress updates and a `final` event.
+- `POST /corrupt` → text corruption utility (for testing detector robustness)
+  - Request body (JSON): `text: string`, `corruption_rate: number`
+  - Response: `{ corrupted_text: string, n_corrupted: number }`
 
 Examples
 

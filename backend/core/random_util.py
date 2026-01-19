@@ -1,12 +1,3 @@
-"""Utility RNGs: a lightweight Mersenne-Twister implementation and a
-small wrapper that can use either numpy's Generator or the Mersenne
-implementation.
-
-Notes:
-- The two generators produce different sequences for the same seed; they are
-  intentionally not interoperable. This module keeps a tiny, compatible API.
-"""
-
 from typing import Any, List, Optional
 
 import numpy as np
@@ -15,13 +6,6 @@ __all__ = ["mersenne_rng", "RandomGenerator"]
 
 
 class mersenne_rng:
-    """A minimal Mersenne Twister (MT19937) implementation.
-
-    Only the functionality required by the project is implemented: generate
-    32-bit integers (`randint()`), a [0,1) float (`rand()`), and a
-    permutation (`randperm(n)`). Methods return Python built-in types.
-    """
-
     def __init__(self, seed: int = 5489) -> None:
         self.state = [0] * 624
         self.f = 1812433253
@@ -86,19 +70,8 @@ class mersenne_rng:
 
 
 class RandomGenerator:
-    """Small wrapper that exposes a consistent API over numpy or the
-    mersenne_rng implementation.
-
-    Methods:
-    - randint(low, high=None): matches numpy's semantics (high exclusive).
-    - rand(): float in [0,1).
-    - randperm(n): returns a Python list of a permutation.
-    """
-
     def __init__(self, seed: int = 42, use_numpy: bool = True) -> None:
         self.use_numpy = bool(use_numpy)
-        # Annotate as Any to avoid static analysis confusion; we guard usage
-        # with `self.use_numpy` checks before calling backend-specific APIs.
         self.rng: Any
         if self.use_numpy:
             self.rng = np.random.default_rng(seed)
@@ -106,15 +79,11 @@ class RandomGenerator:
             self.rng = mersenne_rng(seed)
 
     def randint(self, low: int, high: Optional[int] = None) -> int:
-        """Return an integer in the interval [low, high) if high is provided,
-        otherwise in [0, low).
-        """
         if self.use_numpy:
             if high is None:
                 return int(self.rng.integers(low))
             return int(self.rng.integers(low, high))
 
-        # mersenne backend
         if high is None:
             high = low
             low = 0
@@ -129,6 +98,5 @@ class RandomGenerator:
 
     def randperm(self, n: int) -> List[int]:
         if self.use_numpy:
-            # numpy returns ndarray; convert to list for a consistent API
             return self.rng.permutation(n).tolist()
         return self.rng.randperm(n)

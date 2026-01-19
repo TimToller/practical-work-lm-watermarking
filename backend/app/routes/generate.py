@@ -32,7 +32,6 @@ def apply_temperature_and_nucleus(logits, temperature=1.0, top_p=None):
     z = logits.astype(np.float64) / max(temperature, 1e-6)
     p = np.exp(z - z.max())
     if top_p is not None and top_p < 1.0:
-        # nucleus mask
         idx = np.argsort(-p)
         cdf = np.cumsum(p[idx])
         cut = np.searchsorted(cdf, top_p * p.sum(), side="right")
@@ -42,7 +41,6 @@ def apply_temperature_and_nucleus(logits, temperature=1.0, top_p=None):
         p = p * mask
     s = p.sum()
     if s == 0:
-        # fallback: uniform over what’s left (shouldn’t happen if logits are sane)
         mask = p > 0
         p = mask.astype(np.float64) / max(1, mask.sum())
     else:
@@ -51,7 +49,6 @@ def apply_temperature_and_nucleus(logits, temperature=1.0, top_p=None):
 
 
 def expmin_choose(p, u):
-    # Stable: argmin(-log u / p). Use eps to avoid div by zero / log(0).
     eps = 1e-12
     scores = -np.log(np.clip(u, eps, 1.0 - eps)) / np.clip(p, eps, 1.0)
     return int(np.argmin(scores))
@@ -60,11 +57,6 @@ def expmin_choose(p, u):
 def _watermarked_generate_iter(
     req: GenerateRequest, llm: ModelBackend
 ) -> T.Iterator[dict]:
-    """
-    Yields per-token telemetry including vanilla vs watermarked choices and
-    pre-/post-watermark probabilities.
-    """
-
     vanilla_text: str | None = None
     vanilla_ids: T.List[int] | None = None
 
@@ -109,11 +101,14 @@ def _watermarked_generate_iter(
     step = 0
     prompt_offset = len(prompt_tokens)
 
-    for _ in range(m):
-        pos = len(token_ids)
-        shift = pos % req.n
+    import hashlib
 
-        # --- Get vanilla probs (pre-watermark)
+    h = hashlib.sha256(str(req.key).encode("utf-8") + b":shift").digest()
+    shift0 = int.from_bytes(h[:8], "big") % req.n
+
+    for step in range(m):
+        pos = len(token_ids)
+
         logits = llm.last_logits()
         if logits is None or len(logits) != V:
             raise HTTPException(
@@ -121,40 +116,27 @@ def _watermarked_generate_iter(
                 "Backend must expose full next-token logits (length V) for exp-min watermarking.",
             )
 
-        # 1) build the exact baseline distribution you want to mimic
         p = apply_temperature_and_nucleus(
             np.array(logits, dtype=np.float64),
             temperature=float(req.temperature),
             top_p=(float(req.top_p) if req.top_p else None),
         )
 
-        # 2) choose row in xi deterministically (shift + relative step)
-        if step == 0:
-            # derive a fixed shift from key so detector can recompute it
-            import hashlib
-
-            h = hashlib.sha256(str(req.key).encode("utf-8") + b":shift").digest()
-            shift = int.from_bytes(h[:8], "big") % req.n
-        row = (shift + step) % req.n
-
-        u = xi[row]  # shape (V,), floats in (0,1)
-
-        # 3) exp-min choice (distortion-free w.r.t. p)
+        row = (shift0 + step) % req.n
+        u = xi[row]
         chosen_id = expmin_choose(p, u)
 
-        # 4) advance the model with the chosen id
         token_ids.append(chosen_id)
-        llm.eval([chosen_id])  # or equivalent
+        llm.eval([chosen_id])
 
         token_text = llm.detokenize([chosen_id])
 
         yield {
             "type": "token",
-            "step": step,  # 0..m-1
+            "step": step,
             "text": token_text,
             "vanilla_text": vanilla_text,
             "id": chosen_id,
-            # --- telemetry you asked for:
             "prompt_offset": prompt_offset,
             "total_steps": m,
         }
@@ -197,7 +179,6 @@ def _sse_format(event: dict) -> str:
     if et == "final":
         data = {**event["payload"]}
     else:
-        # include all telemetry fields for token events
         data = {k: v for k, v in event.items() if k not in ("type",)}
     return f"event: {et}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 

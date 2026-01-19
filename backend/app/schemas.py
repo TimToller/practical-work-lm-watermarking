@@ -15,7 +15,6 @@ class GenerateRequest(BaseModel):
         True,
         description="If True, include the model's system prompt in the generation context",
     )
-    # Optional vanilla generation for comparison (distortion-free baseline)
     return_vanilla: bool = Field(
         False, description="Also generate a non-watermarked baseline continuation"
     )
@@ -35,7 +34,6 @@ class GenerateResponse(BaseModel):
     token_ids: T.List[int]
     used_top_n: int | None = None
     warning: str | None = None
-    # Optional vanilla (non-watermarked) comparison
     vanilla_text: str | None = None
     vanilla_token_ids: T.List[int] | None = None
     elapsed: float

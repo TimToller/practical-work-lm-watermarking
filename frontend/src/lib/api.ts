@@ -43,3 +43,31 @@ export const getModelInfo = async () => {
 	const response = await fetch(`${API_BASE}/model`);
 	return response.json().then((data) => data as ModelInfo);
 };
+
+export type CorruptTextRequest = {
+	text: string;
+	corruption_rate: number; // between 0 and 1
+};
+
+export type CorruptTextResponse = {
+	corrupted_text: string;
+	corruption_rate: number;
+	corruption_offset: number;
+	elapsed: number;
+};
+
+export const corruptText = async (request: CorruptTextRequest): Promise<CorruptTextResponse> => {
+	const response = await fetch(`${API_BASE}/corrupt`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(request),
+	});
+
+	if (!response.ok) {
+		throw new Error(`Error corrupting text: ${response.statusText}`);
+	}
+
+	return response.json().then((data) => data as CorruptTextResponse);
+};

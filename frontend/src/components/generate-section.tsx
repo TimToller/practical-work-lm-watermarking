@@ -1,12 +1,13 @@
 import { parseSSEChunk } from "@/lib/api";
 import { API_BASE } from "@/lib/consts";
 import { getPrompt } from "@/lib/prompt";
-import { activeTab, detectSettings, generateSettings } from "@/lib/store";
+import { corruptedText, generateSettings } from "@/lib/store";
 import { useAtom } from "jotai";
-import { ArrowRightCircle, Copy, PlayCircle, Shuffle, Sparkles } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import React, { useState } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import { PlayCircle, Shuffle, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
+import CorruptCard from "./corrupt-card";
+import GenerateCard from "./generate-card";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -14,7 +15,7 @@ import { Label } from "./ui/label";
 import { TabsContent } from "./ui/tabs";
 import { Textarea } from "./ui/textarea";
 
-type GenerateRequestPayload = {
+export type GenerateRequestPayload = {
 	prompt: string;
 	m: number;
 	n: number;
@@ -25,7 +26,7 @@ type GenerateRequestPayload = {
 	key: number;
 };
 
-type GenerateResponsePayload = {
+export type GenerateResponsePayload = {
 	text: string;
 	token_ids: number[];
 	used_top_n?: number | null;
@@ -36,7 +37,7 @@ type GenerateResponsePayload = {
 	error?: { status_code: number; detail: string };
 };
 
-type GenerateTokenEvent = {
+export type GenerateTokenEvent = {
 	step: number;
 	text: string;
 	id: number;
@@ -47,8 +48,7 @@ type GenerateTokenEvent = {
 
 export default function GenerateSection() {
 	const [settings, setSettings] = useAtom(generateSettings);
-	const [, setTab] = useAtom(activeTab);
-	const [, setDetect] = useAtom(detectSettings);
+	const [, setCorrupted] = useAtom(corruptedText);
 
 	const { prompt, maxTokens: m, n, temperature, returnVanillaBaseline: returnVanilla, key, top_p: topP } = settings;
 
@@ -56,33 +56,6 @@ export default function GenerateSection() {
 	const [generatedTokens, setGeneratedTokens] = useState<GenerateTokenEvent[]>([]);
 	const [finalGenerate, setFinalGenerate] = useState<GenerateResponsePayload | null>(null);
 	const [generateError, setGenerateError] = useState<string | null>(null);
-	const [copied, setCopied] = useState(false);
-
-	const fullGeneratedText = React.useMemo(() => {
-		// Prefer the backend's final text if available and not an error
-		if (finalGenerate?.text && !finalGenerate.error) {
-			return finalGenerate.text;
-		}
-		const continuation = generatedTokens.map((t) => t.text).join("");
-		return continuation;
-	}, [finalGenerate, generatedTokens, prompt]);
-
-	const handleCopyGenerated = async () => {
-		if (!fullGeneratedText) return;
-		try {
-			await navigator.clipboard.writeText(fullGeneratedText);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 1500);
-		} catch (err) {
-			console.error("Failed to copy:", err);
-		}
-	};
-
-	const handleBringToDetect = () => {
-		if (!fullGeneratedText) return;
-		setDetect((prev) => ({ ...prev, text: fullGeneratedText }));
-		setTab("detect");
-	};
 
 	const shufflePrompt = () => {
 		setSettings((prev) => ({ ...prev, prompt: getPrompt() }));
@@ -142,6 +115,7 @@ export default function GenerateSection() {
 					} else if (event === "final") {
 						const final = data as GenerateResponsePayload;
 						setFinalGenerate(final);
+						setCorrupted(() => ({ original: final.text, corrupted: final.text }));
 						if (final.error) {
 							setGenerateError(`${final.error.status_code}: ${final.error.detail}`);
 						}
@@ -291,119 +265,9 @@ export default function GenerateSection() {
 					{finalGenerate?.warning && !finalGenerate.error && <p className="text-xs text-amber-300">⚠ {finalGenerate.warning}</p>}
 				</CardContent>
 			</Card>
+			<GenerateCard finalGenerate={finalGenerate} generatedTokens={generatedTokens} isGenerating={isGenerating} prompt={prompt} />
 
-			{/* Generated output with animated tokens */}
-			<Card className="border-slate-800 bg-slate-900/70 backdrop-blur">
-				<CardHeader className="pb-2">
-					<CardTitle className="flex items-center justify-between text-sm">
-						<span>Generated output</span>
-						<div className="flex items-center gap-2">
-							<span className="text-[11px] font-normal text-slate-400">tokens: {generatedTokens.length}</span>
-
-							<Button
-								variant="outline"
-								size="icon"
-								className="h-7 w-7 border-slate-700 bg-slate-900"
-								onClick={handleCopyGenerated}
-								disabled={!fullGeneratedText}>
-								<Copy className="h-3 w-3" />
-							</Button>
-
-							<Button
-								variant="outline"
-								size="icon"
-								className="h-7 w-7 border-slate-700 bg-slate-900"
-								onClick={handleBringToDetect}
-								disabled={!fullGeneratedText}>
-								<ArrowRightCircle className="h-3 w-3" />
-							</Button>
-						</div>
-					</CardTitle>
-
-					{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard ✔</p>}
-				</CardHeader>
-				<CardContent>
-					<div className="relative min-h-[140px] rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm leading-relaxed">
-						{generatedTokens.length > 0 ? (
-							<p className="whitespace-pre-wrap font-mono">
-								<AnimatePresence initial={false}>
-									{generatedTokens.map((tok) => (
-										<motion.span
-											key={tok.step}
-											className="inline"
-											initial={{ opacity: 0, y: 4 }}
-											animate={{ opacity: 1, y: 0 }}
-											exit={{ opacity: 0 }}
-											transition={{ duration: 0.12 }}>
-											{tok.text}
-										</motion.span>
-									))}
-								</AnimatePresence>
-							</p>
-						) : (
-							<span className="text-xs text-slate-500">Generated text will appear here, token by token.</span>
-						)}
-
-						{isGenerating && (
-							<motion.div
-								className="pointer-events-none absolute inset-x-3 bottom-2 flex items-center gap-2 text-[11px] text-slate-400"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}>
-								<span className="h-[3px] flex-1 overflow-hidden rounded-full bg-slate-800">
-									<motion.span
-										className="block h-full bg-emerald-400"
-										animate={{ x: ["-100%", "0%", "100%"] }}
-										transition={{ repeat: Infinity, duration: 1.2 }}
-									/>
-								</span>
-								<span>streaming...</span>
-							</motion.div>
-						)}
-					</div>
-
-					{returnVanilla && finalGenerate?.vanilla_text && !finalGenerate.error && (
-						<Accordion type="single" collapsible className="w-full">
-							<AccordionItem value="vanilla">
-								<AccordionTrigger>Vanilla baseline</AccordionTrigger>
-								<AccordionContent className="flex flex-col gap-4 text-balance">
-									<p className="whitespace-pre-wrap font-mono text-slate-300">{finalGenerate.vanilla_text}</p>
-								</AccordionContent>
-							</AccordionItem>
-						</Accordion>
-					)}
-				</CardContent>
-			</Card>
-			<Card className="border-slate-800 bg-slate-900/70 backdrop-blur">
-				<CardHeader className="pb-2">
-					<CardTitle className="flex items-center justify-between text-sm">
-						<span>Corrupt Text</span>
-						<div className="flex items-center gap-2">
-							<span className="text-[11px] font-normal text-slate-400">tokens: {generatedTokens.length}</span>
-
-							<Button
-								variant="outline"
-								size="icon"
-								className="h-7 w-7 border-slate-700 bg-slate-900"
-								onClick={handleCopyGenerated}
-								disabled={!fullGeneratedText}>
-								<Copy className="h-3 w-3" />
-							</Button>
-
-							<Button
-								variant="outline"
-								size="icon"
-								className="h-7 w-7 border-slate-700 bg-slate-900"
-								onClick={handleBringToDetect}
-								disabled={!fullGeneratedText}>
-								<ArrowRightCircle className="h-3 w-3" />
-							</Button>
-						</div>
-					</CardTitle>
-
-					{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard ✔</p>}
-				</CardHeader>
-				<CardContent></CardContent>
-			</Card>
+			<CorruptCard />
 		</TabsContent>
 	);
 }

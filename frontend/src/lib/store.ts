@@ -1,3 +1,4 @@
+import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 export type TabKey = "generate" | "detect";
@@ -21,6 +22,11 @@ export const generateOutput = atomWithStorage("generateOutput", {
 	isGenerating: false,
 });
 
+export const corruptedText = atom({
+	original: "",
+	corrupted: "",
+});
+
 export const detectSettings = atomWithStorage("detectSettings", {
 	text: "",
 	n: 256,
@@ -28,6 +34,6 @@ export const detectSettings = atomWithStorage("detectSettings", {
 	key: 42,
 });
 
-export const detectOutput = atomWithStorage("detectOutput", {
+export const detectOutput = atom({
 	isDetecting: false,
 });

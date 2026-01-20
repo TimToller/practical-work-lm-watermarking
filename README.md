@@ -36,9 +36,7 @@ Backend (uv + uvicorn)
 cd backend
 uv venv
 source .venv/bin/activate
-uv sync
-cd ..
-uv run uvicorn backend.app.main:app --reload --port 8000
+fastapi run app/main.py
 ```
 
 Frontend (pnpm)

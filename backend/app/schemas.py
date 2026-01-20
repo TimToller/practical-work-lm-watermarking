@@ -30,37 +30,61 @@ class GenerateRequest(BaseModel):
 
 
 class GenerateResponse(BaseModel):
-    text: str
-    token_ids: T.List[int]
-    used_top_n: int | None = None
-    warning: str | None = None
-    vanilla_text: str | None = None
-    vanilla_token_ids: T.List[int] | None = None
-    elapsed: float
+    text: str = Field(..., description="Generated watermarked continuation")
+    token_ids: T.List[int] = Field(
+        ..., description="Token IDs for the generated watermarked continuation"
+    )
+    used_top_n: int | None = Field(
+        None,
+        description="Top-N actually used for probability approximation (if applicable)",
+    )
+    warning: str | None = Field(
+        None,
+        description="Optional warning message (e.g., when falling back to an approximation)",
+    )
+    vanilla_text: str | None = Field(
+        None,
+        description="Non-watermarked baseline continuation (only if requested)",
+    )
+    vanilla_token_ids: T.List[int] | None = Field(
+        None,
+        description="Token IDs for the non-watermarked baseline continuation (only if requested)",
+    )
+    elapsed: float = Field(..., description="Elapsed wall-clock time in seconds")
 
 
 class DetectRequest(BaseModel):
-    text: str
-    n: int = 256
-    key: int = 42
-    k: int | None = None
-    gamma: float = 0.0
-    n_runs: int = 500
+    text: str = Field(..., description="Text to test for the presence of the watermark")
+    n: int = Field(256, description="Watermark sequence length used during generation")
+    key: int = Field(42, description="Watermark key used during generation")
+    k: int | None = Field(
+        None,
+        description="Optional k parameter for the detector; if omitted, the server will choose a default",
+    )
+    gamma: float = Field(
+        0.0,
+        description="Optional detector parameter (gamma) controlling the test statistic",
+    )
+    n_runs: int = Field(
+        500,
+        description="Number of Monte Carlo / permutation runs used to estimate a p-value",
+    )
 
 
 class DetectResponse(BaseModel):
-    p_value: float
-    length: int
-    n: int
-    k: int
+    p_value: float = Field(..., description="Estimated p-value of the watermark test")
+    length: int = Field(..., description="Length of the analyzed token sequence")
+    n: int = Field(..., description="Watermark sequence length used for detection")
+    k: int = Field(..., description="k parameter used for detection")
     watermarked: str = Field(
-        "unlikely", description="Watermarked status based on p-value"
+        "unlikely",
+        description="Watermarked status based on p-value. Either unlikely (p>0.05), likely (p<=0.05) or very likely (p<=0.01)",
     )
-    elapsed: float
+    elapsed: float = Field(..., description="Elapsed time")
 
 
 class CorruptRequest(BaseModel):
-    text: str
+    text: str = Field(..., description="Text to corrupt")
     corruption_goal: float = Field(
         0.2,
         ge=0.0,
@@ -74,7 +98,12 @@ class CorruptRequest(BaseModel):
 
 
 class CorruptResponse(BaseModel):
-    corrupted_text: str
-    corruption_rate: float
-    corruption_offset: float
-    elapsed: float
+    corrupted_text: str = Field(..., description="Corrupted version of the input text")
+    corruption_rate: float = Field(
+        ..., description="Measured corruption rate achieved by the corruption procedure"
+    )
+    corruption_offset: float = Field(
+        ...,
+        description="Difference between achieved corruption_rate and requested corruption_goal",
+    )
+    elapsed: float = Field(..., description="Elapsed wall-clock time in seconds")

@@ -9,7 +9,7 @@ origins = [
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Exp-Min Watermark API (llama.cpp)", version="1.0.0")
+    app = FastAPI(title="Exp-Min Watermark API", version="1.0.0")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,

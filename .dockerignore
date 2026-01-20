@@ -1,0 +1,26 @@
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# Virtualenvs
+**/.venv/
+**/venv/
+**/.env
+
+# Git
+.git/
+.gitignore
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+frontend/.nuxt/
+
+# OS / editor
+.DS_Store

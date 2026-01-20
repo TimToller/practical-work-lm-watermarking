@@ -1,6 +1,7 @@
 import { parseSSEChunk } from "@/lib/api";
 import { API_BASE } from "@/lib/consts";
 import { detectSettings } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
 import { BarChart3, PlayCircle } from "lucide-react";
 import { motion } from "motion/react";
@@ -290,7 +291,18 @@ export default function DetectSection() {
 									p-value: <span className="ml-1 font-mono">{detectFinal.p_value.toFixed(4)}</span>
 								</Badge>
 								<Badge className="bg-slate-800 px-2 py-0.5 text-[11px]" variant="outline">
-									status: <span className="ml-1 capitalize text-emerald-300">{detectFinal.watermarked}</span>
+									status:{" "}
+									<span
+										className={cn(
+											"ml-1 capitalize",
+											detectFinal.watermarked === "very likely"
+												? "text-emerald-300"
+												: detectFinal.watermarked === "unlikely"
+													? "text-red-400"
+													: "text-yellow-300",
+										)}>
+										{detectFinal.watermarked}
+									</span>
 								</Badge>
 							</div>
 						)}

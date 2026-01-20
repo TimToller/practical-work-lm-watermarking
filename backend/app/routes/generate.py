@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 import time
 import uuid
 import typing as T
@@ -185,12 +186,16 @@ def _sse_format(event: dict) -> str:
     return f"event: {et}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
+model_lock = threading.Lock()
+
+
 @router.post("/generate/stream")
 def generate_stream(req: GenerateRequest, llm: ModelBackend = Depends(get_backend)):
     def event_iter():
         try:
-            for event in _watermarked_generate_iter(req, llm):
-                yield _sse_format(event)
+            with model_lock:
+                for event in _watermarked_generate_iter(req, llm):
+                    yield _sse_format(event)
         except HTTPException as e:
             err = {
                 "type": "final",

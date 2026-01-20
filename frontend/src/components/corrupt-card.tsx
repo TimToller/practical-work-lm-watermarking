@@ -3,7 +3,7 @@ import { activeTab, corruptedText, detectSettings } from "@/lib/store";
 import { similarityPercent } from "@/lib/utils";
 import { diffWordsWithSpace } from "diff";
 import { useAtom } from "jotai";
-import { ArrowRightCircle, Copy, Hammer } from "lucide-react";
+import { ArrowRightCircle, Copy, Hammer, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Button } from "./ui/button";
@@ -16,6 +16,7 @@ export default function CorruptCard() {
 
 	const [copied, setCopied] = useState(false);
 	const [showDeletions, setShowDeletions] = useState(true);
+	const [isCorrupting, setIsCorrupting] = useState(false);
 
 	const percent = useMemo(() => similarityPercent(original ?? "", corrupted ?? ""), [original, corrupted]);
 
@@ -43,11 +44,13 @@ export default function CorruptCard() {
 
 	const handleCorrupt = async () => {
 		if (!original) return;
+		setIsCorrupting(true);
 
 		const { corrupted_text } = await corruptText({
 			text: original,
 			corruption_rate: 0.1, // aim to corrupt 10% of the text
 		});
+		setIsCorrupting(false);
 		setCorrupted((prev) => ({
 			...prev,
 			corrupted: corrupted_text,
@@ -55,7 +58,7 @@ export default function CorruptCard() {
 	};
 
 	const canShowStats = Boolean(original && corrupted);
-	const canCorrupt = Boolean(original);
+	const canCorrupt = Boolean(corrupted);
 
 	return (
 		<Card className="border-slate-800 bg-slate-900/70 backdrop-blur">
@@ -102,7 +105,7 @@ export default function CorruptCard() {
 
 				{original && corrupted && (
 					<div className="mt-3">
-						<Accordion type="single" collapsible defaultValue="diff">
+						<Accordion type="single" collapsible>
 							<AccordionItem value="diff" className="border-slate-800">
 								<AccordionTrigger className="text-slate-200 hover:no-underline">Diff preview</AccordionTrigger>
 								<AccordionContent>
@@ -144,8 +147,8 @@ export default function CorruptCard() {
 				)}
 
 				<div className="mt-3 flex justify-end">
-					<Button onClick={handleCorrupt} disabled={!canCorrupt} className="gap-2">
-						<Hammer className="h-4 w-4" />
+					<Button onClick={handleCorrupt} disabled={!canCorrupt || isCorrupting} className="gap-2">
+						{isCorrupting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Hammer className="h-4 w-4" />}
 						Corrupt
 					</Button>
 				</div>

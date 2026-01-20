@@ -23,8 +23,6 @@ def _detect_iter(req, llm) -> Iterator[Dict[str, Any]]:
     tokens = np.array(llm.tokenize(req.text), dtype=np.int32)
     m = int(tokens.shape[0])
 
-    # Demo-friendly default: if req.k is None, cap it (keeps DP fast).
-    # You can keep your old behavior if you want, but this makes live demos smooth.
     k = int(req.k) if req.k is not None else min(m, 128)
     k = min(k, m)
 
@@ -42,23 +40,19 @@ def _detect_iter(req, llm) -> Iterator[Dict[str, Any]]:
         "n_runs": n_runs,
         "vocab_size": vocab_size,
         "gamma": gamma,
-        # optional knobs for demo:
         "max_offsets": 16,
     }
 
-    # ---- Prepare uniq tokens for the k-block only
     block = tokens[:k]
-    uniq, inv = np.unique(block, return_inverse=True)  # uniq: (U,), inv: (k,)
+    uniq, inv = np.unique(block, return_inverse=True)
     inv = inv.astype(np.int32)
     U = int(uniq.shape[0])
 
-    # ---- Observed: compute only (n, U) xi values deterministically from key
     rows = np.arange(n, dtype=np.int32)
-    xi_small = xi_u_matrix(key, rows, uniq)  # (n, U) float32
-    log_w = log1m_clip(xi_small)  # (n, U) float32
+    xi_small = xi_u_matrix(key, rows, uniq)
+    log_w = log1m_clip(xi_small)
 
-    # ---- Observed statistic (min over offsets, but pruned to top-K offsets)
-    MAX_OFFSETS = 16  # demo speed knob; set to None for full search
+    MAX_OFFSETS = 16
     test_result = detect_stat_prepared(
         inv, log_w, n=n, gamma=gamma, max_offsets=MAX_OFFSETS
     )
@@ -71,13 +65,11 @@ def _detect_iter(req, llm) -> Iterator[Dict[str, Any]]:
         "U": U,
     }
 
-    # ---- Null runs (generate (n, U), not (n, V))
-    null_rng = np.random.default_rng()  # or seed for reproducibility
+    null_rng = np.random.default_rng()
 
     p = 0
     every = 5
 
-    # Early-stop thresholds (your UI categories)
     TH_VERY = 0.01
     TH_LIKELY = 0.05
     early_stop_reason = None
@@ -92,7 +84,6 @@ def _detect_iter(req, llm) -> Iterator[Dict[str, Any]]:
         if null <= test_result:
             p += 1
 
-        # --- early stopping bounds on final smoothed p-value
         remaining = n_runs - i
         pval_min = (p + 1.0) / (n_runs + 1.0)  # if remaining never beat
         pval_max = (p + remaining + 1.0) / (n_runs + 1.0)  # if remaining always beat

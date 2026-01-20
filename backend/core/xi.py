@@ -5,12 +5,10 @@ import numpy as np
 
 _MASK64 = np.uint64(0xFFFFFFFFFFFFFFFF)
 
-# SplitMix64 constants
 _SM64_C1 = np.uint64(0x9E3779B97F4A7C15)
 _SM64_C2 = np.uint64(0xBF58476D1CE4E5B9)
 _SM64_C3 = np.uint64(0x94D049BB133111EB)
 
-# Additional mix constants to combine row/token into the PRF input
 _ROW_MIX = np.uint64(0xD1342543DE82EF95)
 _TOK_MIX = np.uint64(0xA24BAED4963EE407)
 
@@ -21,11 +19,6 @@ def seed64(key: str, salt: str) -> np.uint64:
 
 
 def _splitmix64(x: np.ndarray) -> np.ndarray:
-    """
-    Vectorized SplitMix64 mixer.
-    x: uint64 ndarray
-    returns uint64 ndarray
-    """
     z = (x + _SM64_C1) & _MASK64
     z = (z ^ (z >> np.uint64(30))) * _SM64_C2 & _MASK64
     z = (z ^ (z >> np.uint64(27))) * _SM64_C3 & _MASK64
@@ -34,23 +27,13 @@ def _splitmix64(x: np.ndarray) -> np.ndarray:
 
 
 def _u01_from_uint64(z: np.ndarray) -> np.ndarray:
-    """
-    Convert uint64 -> float in [0,1) using top 53 bits (like IEEE double mantissa).
-    Returned as float32 for speed/memory.
-    """
     return ((z >> np.uint64(11)).astype(np.float64) * (1.0 / (1 << 53))).astype(
         np.float32
     )
 
 
 def xi_u_matrix(key: str, rows: np.ndarray, token_ids: np.ndarray) -> np.ndarray:
-    """
-    Deterministic U(0,1) values for (row, token_id) pairs.
 
-    rows: (R,) int array
-    token_ids: (U,) int array
-    returns: (R, U) float32
-    """
     base = seed64(key, "xi")
     r = rows.astype(np.uint64)[:, None]
     t = token_ids.astype(np.uint64)[None, :]

@@ -48,7 +48,7 @@ export default function CorruptCard() {
 
 		const { corrupted_text } = await corruptText({
 			text: original,
-			corruption_rate: 0.1, // aim to corrupt 10% of the text
+			similarity_goal: 0.9, // aim to corrupt 10% of the text
 		});
 		setIsCorrupting(false);
 		setCorrupted((prev) => ({

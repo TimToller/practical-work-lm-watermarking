@@ -13,7 +13,6 @@ from backend.app.schemas import GenerateRequest, GenerateResponse
 from backend.app.deps import get_backend
 from backend.model.backend import ModelBackend
 from backend.core.random_util import RandomGenerator
-from backend.util.logging import logger
 
 from backend.core.xi import xi_u_vector
 import hashlib

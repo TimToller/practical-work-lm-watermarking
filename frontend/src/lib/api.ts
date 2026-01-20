@@ -46,13 +46,13 @@ export const getModelInfo = async () => {
 
 export type CorruptTextRequest = {
 	text: string;
-	corruption_rate: number; // between 0 and 1
+	similarity_goal: number; // between 0 and 1
 };
 
 export type CorruptTextResponse = {
 	corrupted_text: string;
-	corruption_rate: number;
-	corruption_offset: number;
+	similarity: number;
+	similarity_goal_offset: number;
 	elapsed: number;
 };
 

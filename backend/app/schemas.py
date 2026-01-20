@@ -85,13 +85,13 @@ class DetectResponse(BaseModel):
 
 class CorruptRequest(BaseModel):
     text: str = Field(..., description="Text to corrupt")
-    corruption_goal: float = Field(
+    similarity_goal: float = Field(
         0.2,
         ge=0.0,
         le=1.0,
         description=(
-            "Target corruption rate in [0,1]. The endpoint will corrupt the text by back-translation "
-            "of a subset of sentences until the measured corruption rate roughly reaches this goal."
+            "Target similarity rate in [0,1]. The endpoint will corrupt the text "
+            "of a subset of sentences until the measured similarity rate roughly reaches this goal."
         ),
     )
     seed: int | None = Field(None, description="Random seed for reproducibility")
@@ -99,11 +99,11 @@ class CorruptRequest(BaseModel):
 
 class CorruptResponse(BaseModel):
     corrupted_text: str = Field(..., description="Corrupted version of the input text")
-    corruption_rate: float = Field(
-        ..., description="Measured corruption rate achieved by the corruption procedure"
+    similarity: float = Field(
+        ..., description="Measured similarity by the corruption procedure"
     )
-    corruption_offset: float = Field(
+    similarity_offset: float = Field(
         ...,
-        description="Difference between achieved corruption_rate and requested corruption_goal",
+        description="Difference between achieved similarity and requested similarity_goal",
     )
     elapsed: float = Field(..., description="Elapsed wall-clock time in seconds")

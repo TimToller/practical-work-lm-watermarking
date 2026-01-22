@@ -1,7 +1,9 @@
-
-
 \section{Frontend Implementation }
-\subsection{UI Structure and Main Views}
-\subsection{API Client and Data Flow}
-\subsection{Streaming Handling and Result Visualization}
-\subsection{User Inputs and Validation }
+\subsection{Structure and Architecture}
+React popular user interface, vite as build tool for client side rendering, shadncn/ui as component library as it gives forms, charts, accesibility etc. Tailwind css for styling. Vite proxy to backend
+jotai as minimal state management library.
+\subsection{Generation}
+You can input any text as a prompt or press the random button to get a random prompt out of the list of prompts that was used in the Kuditipudi experiments. Notice these prompts dont always result in good outputs necessarily. You can then copy the generated text and copy it to clipboard or bring it to the detection screen right away. You can also decide to return vanilla (non watermarked) output to compare the distortion free aspect.
+When you generate something the text gets placed in the bottom at the corrupt sectioon too. you can then alter the text in that textfield right away or press the corrupt button to corrupt it for you. You see the similarity score between the original and corrupted text right at the top and can again copy or bring to detection
+\subsection{Detection}
+Enter text and make sure settings match, then press detect. It will stream the p value after a batch of runs and show if text is very likely, likely or unlikely watermarked based on the p value thresholds. The chart shows the thresholds and changes the colour of the graph accordingly.

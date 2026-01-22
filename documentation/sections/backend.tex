@@ -34,10 +34,10 @@ used a small instruction-tuned model (Llama 3.2 3B Instruct) because it offers a
 However, instruction tuning can generate text with low watermark potential, so this has to be kept in mind. Models with open-ended text generation capabilities are likely to yield better watermarking results.\cite{kuditipudi2023robustarticle}
 \subsection{API Design}
 \subsubsection{Health and Model Info (\texttt{/health}, \texttt{/model})}
-\texttt{/health} is a minimal liveness endpoint implemented in \texttt{backend/app/routes/health.py}. It returns a small
+\texttt{/health} is a minimal liveness endpoint. It returns a small
 JSON object (\texttt{\{"ok": true\}}) to indicate that the API is up.
 
-\texttt{/model} (\texttt{backend/app/routes/model.py}) returns basic runtime configuration and model metadata used by the
+\texttt{/model} returns basic runtime configuration and model metadata used by the
 frontend and for debugging. In particular, it exposes the configured context size and threading/GPU settings as well as
 the resolved model path and vocabulary size.
 \subsubsection{Generation Endpoints (\texttt{/generate}, \texttt{/generate/stream})}
@@ -45,7 +45,7 @@ Both generation and detection are provided as a standard non-streaming and a str
 streaming variants for a more responsive user experience, while the non-streaming endpoints are convenient for manual
 testing.
 
-\texttt{/generate} (\texttt{backend/app/routes/generate.py}) returns the final generation result as a single JSON
+\texttt{/generate} returns the final generation result as a single JSON
 payload.
 
 \texttt{/generate/stream} streams results via Server-Sent Events (SSE, \texttt{text/event-stream}). The stream sends
@@ -53,7 +53,7 @@ incremental \texttt{token} events as each new token is sampled, and finishes wit
 full \texttt{GenerateResponse} payload.
 
 \subsubsection{Detection Endpoints (\texttt{/detect}, \texttt{/detect/stream})}
-\texttt{/detect} (\texttt{backend/app/routes/detect.py}) tokenizes the provided text and runs the watermark detector.
+\texttt{/detect} tokenizes the provided text and runs the watermark detector.
 The response includes an estimated p-value and a coarse interpretation (\texttt{unlikely}/\texttt{likely}/\texttt{very likely})
 based on fixed thresholds.
 
@@ -62,8 +62,7 @@ based on fixed thresholds.
 implementation includes a simple early-stopping heuristic: if intermediate bounds imply that the final classification
 cannot change, the endpoint stops the Monte Carlo loop early and reports the reason.
 \subsubsection{Corruption Endpoint (\texttt{/corrupt})}
-To evaluate robustness against simple corruption attacks, \texttt{/corrupt} (\texttt{backend/app/routes/corrupt.py})
-produces a perturbed version of an input text.
+To evaluate robustness against simple corruption attacks, \texttt{/corrupt} produces a perturbed version of an input text.
 
 The original paper evaluates corruption using back-translation. This project initially explored that idea, but the
 translation toolchain significantly increased dependencies and latency. For a lightweight and fast alternative, the
@@ -85,6 +84,3 @@ n_threads: 0        # 0 -> auto CPU count
 n_gpu_layers: -1
 top_n_probs: 512
 \end{verbatim}
-
-At startup, \texttt{backend/app/deps.py} resolves \texttt{n\_threads}: if configured as $\leq 0$, it is replaced by the
-machine's CPU count. The model backend is initialized once and reused across requests.

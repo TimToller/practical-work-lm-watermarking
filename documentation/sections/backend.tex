@@ -1,27 +1,90 @@
 \section{Backend}
 \subsection{Project Structure and Entry Points}
-we use fastapi as its simple and easy to understand
-we use uv https://docs.astral.sh/uv/ as a package manager for dependencies as thats ideal for large projects like this
-we have top level folders /app for the actual server, /models where the llm models will live, /model for reading in the model and managing it, /core for the most central aspects for the watermarking
+The backend is implemented in Python using \texttt{FastAPI}. The main entry point is the FastAPI application in
+\texttt{backend/app/main.py}, which registers all route modules and configures CORS for the local development
+frontend.
+
+Dependency management is handled via \texttt{uv} (\url{https://docs.astral.sh/uv/}), which provides fast, reproducible
+installs and an ergonomic way to run the application (see also the \texttt{backend/Dockerfile} and the project
+\texttt{README.md}).
+
+At a high level, the backend code is organized as follows:
+\begin{itemize}
+    \item \texttt{backend/app/}: FastAPI application, request/response schemas, and HTTP routes.
+    \item \texttt{backend/app/routes/}: Route modules
+    \item \texttt{backend/app/schemas.py}: Pydantic models for request and response payloads.
+    \item \texttt{backend/core/}: Core watermarking logic
+    \item \texttt{backend/model/}: Abstraction over the model backend and the \texttt{llama-cpp-python} implementation.
+    \item \texttt{backend/models/}: Local model files (\texttt{.gguf}) used by \texttt{llama-cpp-python}.
+\end{itemize}
 
 
 \subsection{Model Backend Integration}
-the main difference between the original code from Kuditipudi is that they used transformers library to load the models, we instead use the llama-cpp-python library as it is more efficient and faster for our use case, this required a lot of changes to the code and experimentation but should make it run faster overall
+Compared to the original implementation by Kuditipudi et al.\cite{kuditipudi2023robustarticle}, which loads models through the
+\texttt{transformers} stack, this project uses \texttt{llama-cpp-python} to run quantized \texttt{.gguf} models
+efficiently on consumer hardware. This change resulted in many changes in the code of the token generation process, but also in faster inference times and lower memory usage.
 
-in principle any .gguf model should work as long as its compatible with llama-cpp-python, we used llama 3.2 3B instruct model as its decent but small, notice according to the original paper using instruct models can reduce the effectiveness of watermarking its best if you use open ended models with open ended prompts but overall it worked ok
+The backend interface is defined in \texttt{backend/model/backend.py}, and the concrete
+implementation is \texttt{backend/model/llama\_cpp\_backend.py}. This backend is instantiated via FastAPI dependency
+injection in \texttt{backend/app/deps.py} and cached using \texttt{lru\_cache} so the model is loaded only once per
+process.
+
+In principle, any \texttt{.gguf} model compatible with \texttt{llama-cpp-python} can be used. For the practical work we
+used a small instruction-tuned model (Llama 3.2 3B Instruct) because it offers a good speed/quality trade-off.
+However, instruction tuning can generate text with low watermark potential, so this has to be kept in mind. Models with open-ended text generation capabilities are likely to yield better watermarking results.\cite{kuditipudi2023robustarticle}
 \subsection{API Design}
 \subsubsection{Health and Model Info (\texttt{/health}, \texttt{/model})}
-/health is a common endpoint which just returns ok if the server is running, model reads out the model and its config info like name, size, etc which is useful to know if the model was loaded properly. we also display this in the frontend later
+\texttt{/health} is a minimal liveness endpoint implemented in \texttt{backend/app/routes/health.py}. It returns a small
+JSON object (\texttt{\{"ok": true\}}) to indicate that the API is up.
+
+\texttt{/model} (\texttt{backend/app/routes/model.py}) returns basic runtime configuration and model metadata used by the
+frontend and for debugging. In particular, it exposes the configured context size and threading/GPU settings as well as
+the resolved model path and vocabulary size.
 \subsubsection{Generation Endpoints (\texttt{/generate}, \texttt{/generate/stream})}
-for both generation and detection we have a stream and non stream endpoint, the frontend only uses the stream ones but the non stream ones are useful for testing. For generation this means that we stream the generated tokens out one by one as they get generated, which is nicer for ux. In principle this endpoint simply takes the prompt along with settings and the key and starts the generation process
+Both generation and detection are provided as a standard non-streaming and a streaming endpoint. The frontend uses the
+streaming variants for a more responsive user experience, while the non-streaming endpoints are convenient for manual
+testing.
+
+\texttt{/generate} (\texttt{backend/app/routes/generate.py}) returns the final generation result as a single JSON
+payload.
+
+\texttt{/generate/stream} streams results via Server-Sent Events (SSE, \texttt{text/event-stream}). The stream sends
+incremental \texttt{token} events as each new token is sampled, and finishes with a \texttt{final} event containing the
+full \texttt{GenerateResponse} payload.
+
 \subsubsection{Detection Endpoints (\texttt{/detect}, \texttt{/detect/stream})}
-similar to generation but instead of generating text we read in text and run the detection algorithm on it, returning the watermark score and whether its watermarked or not. the streaming here simply retuns the current p value over the current run which shows how confident the model is that the text is watermarked as it reads more text, this also improves ux instead of waiting for the final verdict
+\texttt{/detect} (\texttt{backend/app/routes/detect.py}) tokenizes the provided text and runs the watermark detector.
+The response includes an estimated p-value and a coarse interpretation (\texttt{unlikely}/\texttt{likely}/\texttt{very likely})
+based on fixed thresholds.
+
+\texttt{/detect/stream} also uses SSE. It emits an initial \texttt{init} event with the chosen parameters, periodic
+\texttt{progress} events during the Monte Carlo comparison, and a terminating \texttt{final} event. For speed, the
+implementation includes a simple early-stopping heuristic: if intermediate bounds imply that the final classification
+cannot change, the endpoint stops the Monte Carlo loop early and reports the reason.
 \subsubsection{Corruption Endpoint (\texttt{/corrupt})}
-We want to test how robust our model is to corruption attacks so we have an endpoint which takes in text and a corruption level to simulate someone trying to get rid of the watermark. in the paper they use back translation to simulate this corruption. this method was tested in this practical work, but it was evident that including translation libraries and such made this endpoint rather slow and the dependencies very large. so just for the sake of speed and simplicity, we randomly flip characters on a word level basis to try and reach a certain corruption level. this is not as good as back translation but its fast and simple and still gives us a way to test robustness
+To evaluate robustness against simple corruption attacks, \texttt{/corrupt} (\texttt{backend/app/routes/corrupt.py})
+produces a perturbed version of an input text.
+
+The original paper evaluates corruption using back-translation. This project initially explored that idea, but the
+translation toolchain significantly increased dependencies and latency. For a lightweight and fast alternative, the
+current endpoint applies randomized word-level mutations (swap/drop/duplicate/replace characters) until the output
+reaches a requested similarity target.
+
+The request parameter is \texttt{similarity\_goal} in $[0,1]$: values closer to 1.0 apply little to no corruption, while
+lower values increase the amount of perturbation. Similarity is measured using \texttt{difflib.SequenceMatcher}, and the
+response reports both the achieved similarity and the deviation from the target.
 \subsection{Configuration and Runtime Settings}
-Model settings:
-model_path: str = "./backend/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
-n_ctx: int = 4096
-n_threads: int = 0  # 0 → auto cpu count
-n_gpu_layers: int = -1
-top_n_probs: int = 512
+Runtime configuration is defined in \texttt{backend/core/settings.py} using \texttt{pydantic-settings}. All settings
+can be overridden via environment variables (case-insensitive).
+
+Default model settings:
+\begin{verbatim}
+model_path: "./backend/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+n_ctx: 4096
+n_threads: 0        # 0 -> auto CPU count
+n_gpu_layers: -1
+top_n_probs: 512
+\end{verbatim}
+
+At startup, \texttt{backend/app/deps.py} resolves \texttt{n\_threads}: if configured as $\leq 0$, it is replaced by the
+machine's CPU count. The model backend is initialized once and reused across requests.

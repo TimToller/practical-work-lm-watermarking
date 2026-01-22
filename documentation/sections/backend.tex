@@ -1,9 +1,27 @@
 \section{Backend}
 \subsection{Project Structure and Entry Points}
+we use fastapi as its simple and easy to understand
+we use uv https://docs.astral.sh/uv/ as a package manager for dependencies as thats ideal for large projects like this
+we have top level folders /app for the actual server, /models where the llm models will live, /model for reading in the model and managing it, /core for the most central aspects for the watermarking
+
+
+\subsection{Model Backend Integration}
+the main difference between the original code from Kuditipudi is that they used transformers library to load the models, we instead use the llama-cpp-python library as it is more efficient and faster for our use case, this required a lot of changes to the code and experimentation but should make it run faster overall
+
+in principle any .gguf model should work as long as its compatible with llama-cpp-python, we used llama 3.2 3B instruct model as its decent but small, notice according to the original paper using instruct models can reduce the effectiveness of watermarking its best if you use open ended models with open ended prompts but overall it worked ok
 \subsection{API Design}
-\subsubsection{Health and Model Info}
+\subsubsection{Health and Model Info (\texttt{/health}, \texttt{/model})}
+/health is a common endpoint which just returns ok if the server is running, model reads out the model and its config info like name, size, etc which is useful to know if the model was loaded properly. we also display this in the frontend later
 \subsubsection{Generation Endpoints (\texttt{/generate}, \texttt{/generate/stream})}
+for both generation and detection we have a stream and non stream endpoint, the frontend only uses the stream ones but the non stream ones are useful for testing. For generation this means that we stream the generated tokens out one by one as they get generated, which is nicer for ux. In principle this endpoint simply takes the prompt along with settings and the key and starts the generation process
 \subsubsection{Detection Endpoints (\texttt{/detect}, \texttt{/detect/stream})}
-\subsubsection{Corruption Endpoints (\texttt{/corrupt})}
+similar to generation but instead of generating text we read in text and run the detection algorithm on it, returning the watermark score and whether its watermarked or not. the streaming here simply retuns the current p value over the current run which shows how confident the model is that the text is watermarked as it reads more text, this also improves ux instead of waiting for the final verdict
+\subsubsection{Corruption Endpoint (\texttt{/corrupt})}
+We want to test how robust our model is to corruption attacks so we have an endpoint which takes in text and a corruption level to simulate someone trying to get rid of the watermark. in the paper they use back translation to simulate this corruption. this method was tested in this practical work, but it was evident that including translation libraries and such made this endpoint rather slow and the dependencies very large. so just for the sake of speed and simplicity, we randomly flip characters on a word level basis to try and reach a certain corruption level. this is not as good as back translation but its fast and simple and still gives us a way to test robustness
 \subsection{Configuration and Runtime Settings}
-\subsection{Model Backend Integration (llama.cpp / \texttt{llama-cpp-python})}
+Model settings:
+model_path: str = "./backend/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+n_ctx: int = 4096
+n_threads: int = 0  # 0 → auto cpu count
+n_gpu_layers: int = -1
+top_n_probs: int = 512

@@ -1,4 +1,49 @@
 \section{Background: LLM Watermarking and Exp-Min}
-\subsection{What Text Watermarking Is (Generation + Detection)}
+
+\subsection{What Text Watermarking Is}
+
+Text watermarking is the process of embedding a hidden signal into generated text such that the signal can later be detected to infer the text's origin. In the context of language models, watermarking is typically performed during token generation rather than as a post-processing step.
+
+A standard watermarking protocol involves three conceptual roles:
+\begin{enumerate}
+    \item \textbf{Language Model Provider}: Generates text using a language model and embeds a watermark using a secret key.
+    \item \textbf{User}: Receives the generated text and may publish it, modify it, or attempt to remove the watermark.
+    \item \textbf{Detector}: Given a piece of text and the secret key, determines whether the text is likely to contain the watermark.
+\end{enumerate}
+
+Crucially, the detector does not require access to the original prompt or the language model itself. Instead, detection is performed by evaluating a statistical test on the observed token sequence with respect to the secret key. The user is treated as a potential adversary who may attempt to evade detection through paraphrasing, editing, or partial deletion of the text.
+
 \subsection{Exp-Min Watermarking: Idea and Properties}
+
+A central challenge in watermarking language model outputs is preserving output quality. There are many approaches to watermarking, but naïvely biasing token probabilities can introduce noticeable artifacts or degrade fluency. Kuditipudi et al.~\cite{kuditipudi2023robustarticle} address this by proposing \emph{Exponential-Minimum (Exp-Min) sampling}, a method that should preserve the original model distribution exactly.
+
+At each generation step, the language model produces a probability distribution
+\[
+    p : V \rightarrow [0,1]
+\]
+over the vocabulary \(V\). A secret watermark key is used to generate a corresponding vector of independent random variables
+\[
+    \omega \sim \mathcal{U}(0,1)^{|V|}.
+\]
+
+The next token \(t^\ast\) is selected as
+\[
+    t^\ast = \arg\min_{t \in V} \frac{-\ln \omega_t}{p(t)}.
+\]
+
+This procedure samples tokens as if they were drawn from the original distribution \(p\), ensuring distortion-free generation. However, across many tokens, a subtle correlation is introduced between the chosen tokens and the secret key. This correlation constitutes the watermark.
+
 \subsection{Detection Principle: Test Statistic and p-value Interpretation}
+
+Watermark detection is framed as a hypothesis testing problem. Given a text sequence, the detector evaluates whether the observed token sequence is more consistent with the watermark key than would be expected under random keys.
+
+Detection proceeds by:
+\begin{enumerate}
+    \item Computing a test statistic that measures alignment between the observed tokens and the watermark key.
+    \item Comparing this statistic against a null distribution obtained from randomly generated surrogate keys.
+    \item Computing a p-value representing the probability that an unwatermarked text would produce a statistic at least as extreme as the observed one.
+\end{enumerate}
+
+If the p-value falls below a predefined threshold (the suggested threshold by Kuditipudi et al. is \(p < 0.01\)), the text is considered watermarked.
+
+To improve robustness against edits, insertions, and deletions, the detection process can incorporate a Levenshtein-style alignment cost. This allows the detector to tolerate partial mismatches between the generated watermark sequence and the observed text, making the watermark resilient to paraphrasing and moderate corruption.

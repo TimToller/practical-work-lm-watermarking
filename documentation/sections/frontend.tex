@@ -1,9 +1,98 @@
-\section{Frontend Implementation }
+\section{Frontend Implementation}
+
 \subsection{Structure and Architecture}
-React popular user interface, vite as build tool for client side rendering, shadncn/ui as component library as it gives forms, charts, accesibility etc. Tailwind css for styling. Vite proxy to backend
-jotai as minimal state management library.
+The frontend is implemented as a single-page application using \href{https://react.dev}{React} (\href{https://www.typescriptlang.org}{TypeScript}) and built with \href{https://vitejs.dev}{Vite}. The package manager used is \href{https://pnpm.io}{\texttt{pnpm}}, a fast and disk-space-efficient alternative to \href{https://www.npmjs.com}{\texttt{npm}} and \href{https://yarnpkg.com}{\texttt{yarn}}.
+The UI is composed using \href{https://ui.shadcn.com}{\texttt{shadcn/ui}} primitives (cards, tabs, inputs, accordions, badges) and styled with \href{https://tailwindcss.com}{Tailwind CSS}.
+Icons are provided via \href{https://lucide.dev/guide/packages/lucide-react}{\texttt{lucide-react}} and small loading/streaming animations are implemented using \href{https://motion.dev}{\texttt{motion}}.
+For visualization, the detection view uses \href{https://ui.shadcn.com/charts/area}{\texttt{recharts}} to render the running $\hat{p}$ curve.
+
+The application layout is intentionally compact: the main panel contains two tabs (\emph{Generate} and \emph{Detect}) and a second column shows a small \emph{Model info} sidebar.
+This sidebar queries the backend once on page load to display runtime parameters.
+
+\subsection{State Management}
+State is handled with \href{https://jotai.org}{Jotai}.
+User-facing settings (active tab, generation settings, and detection settings) are stored using \href{https://jotai.org/docs/utilities/storage}{\texttt{atomWithStorage}}, which persists them in the browser (\texttt{localStorage}) across reloads.
+This makes it easier to iterate on experiments without repeatedly re-entering parameters such as the watermark key or $n$.
+
+\subsection{Backend Integration and Streaming}
+All API calls are performed using \href{https://developer.mozilla.org/en-US/docs/Web/API/fetch}{\texttt{fetch}}.
+The API base URL is configurable via \texttt{VITE\_API\_BASE\_URL}. If it is not set, requests default to \texttt{/api}.
+During development, \href{https://vitejs.dev}{Vite} proxies \texttt{/api/*} to the backend at \texttt{http://localhost:8000} and rewrites the path (see \href{https://vitejs.dev/config/server-options.html#server-proxy}{Vite proxy configuration}), which avoids \href{https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS}{CORS} issues.
+
+Generation and detection are implemented as \href{https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events}{server-sent event (SSE) streams}.
+Because both endpoints use HTTP \href{https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST}{\texttt{POST}} (to send JSON settings), the frontend reads the response via a \href{https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream}{\texttt{ReadableStream}} and parses SSE frames manually.
+The stream is then mapped to UI updates (token-by-token output for generation, and incremental $\hat{p}$ values for detection).
+
 \subsection{Generation}
-You can input any text as a prompt or press the random button to get a random prompt out of the list of prompts that was used in the Kuditipudi experiments. Notice these prompts dont always result in good outputs necessarily. You can then copy the generated text and copy it to clipboard or bring it to the detection screen right away. You can also decide to return vanilla (non watermarked) output to compare the distortion free aspect.
-When you generate something the text gets placed in the bottom at the corrupt sectioon too. you can then alter the text in that textfield right away or press the corrupt button to corrupt it for you. You see the similarity score between the original and corrupted text right at the top and can again copy or bring to detection
+In the \emph{Generate} tab, the user provides a prompt in a text area.
+For convenience, a shuffle button loads a random prompt from a bundled \texttt{prompts.json} file.
+The user can configure the most relevant parameters:
+\begin{itemize}
+    \item maximum tokens $m$,
+    \item watermark dimension $n$,
+    \item watermark key,
+    \item sampling temperature,
+    \item and an optional \emph{vanilla baseline} output (non-watermarked text) for comparison.
+\end{itemize}
+
+When generation starts, the frontend calls the backend streaming endpoint and renders tokens as they arrive.
+The final event contains the completed text and timing information (and optionally the vanilla baseline text).
+From this view the result can be copied to the clipboard or sent directly to the \emph{Detect} tab.
+
+\subsection{Corruption (Adversarial Editing)}
+Below the generation output, a dedicated \emph{Corrupt Text} card supports controlled editing of the generated text.
+The text area is editable, enabling manual adversarial changes.
+Additionally, a \emph{Corrupt} button calls the backend corruption endpoint with a fixed similarity target of $0.9$ (i.e., aiming for roughly $10\%$ distortion).
+
+To provide immediate feedback, the UI computes a character-level similarity score based on normalized Levenshtein distance and displays it above the editor.
+An optional inline diff preview highlights insertions and deletions, making it easy to understand how the corruption changed the text.
+The corrupted text can then be copied or sent directly to the detector.
+
 \subsection{Detection}
-Enter text and make sure settings match, then press detect. It will stream the p value after a batch of runs and show if text is very likely, likely or unlikely watermarked based on the p value thresholds. The chart shows the thresholds and changes the colour of the graph accordingly.
+In the \emph{Detect} tab, the user pastes (or forwards) a text and configures the detector settings to match the generation configuration.
+The core parameters are $n$, the key, and the number of null runs.
+
+Detection also runs as an SSE stream.
+The frontend collects intermediate \emph{comparing} progress events, each contributing a new point to the running $\hat{p}$ curve.
+Once finished, the final event provides the estimated $p$-value and a qualitative label (\emph{very likely}, \emph{likely}, or \emph{unlikely} watermarked).
+The chart visualizes the running $\hat{p}$ alongside fixed threshold lines (0.01 and 0.05), and the curve colour changes based on the current value.
+
+\subsection{Screenshots}
+% images: corrupt, detect_input, detect_p-value, generate_input, generate_output, model_info
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{images/generate_input.jpg}
+        \caption{Generation input}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{images/generate_output.jpg}
+        \caption{Generation output with corruption}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{images/corrupt.jpg}
+        \caption{Corruption interface}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{images/detect_input.jpg}
+        \caption{Detection input}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{images/detect_p-value.jpg}
+        \caption{Detection output with running $\hat{p}$ curve}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{images/model_info.jpg}
+        \caption{Model info sidebar}
+    \end{subfigure}
+
+    \caption{Frontend screenshots showing the generation and detection interfaces, including the corruption editor and model info sidebar.}
+    \label{fig:frontend_screenshots}
+\end{figure}

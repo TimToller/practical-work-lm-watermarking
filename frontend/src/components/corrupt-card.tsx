@@ -110,8 +110,6 @@ export default function CorruptCard() {
 								<AccordionTrigger className="text-slate-200 hover:no-underline">Diff preview</AccordionTrigger>
 								<AccordionContent>
 									<div className="mb-2 flex items-center justify-between">
-										<p className="text-[11px] text-slate-400">Inline diff</p>
-
 										<Button
 											variant="outline"
 											size="sm"

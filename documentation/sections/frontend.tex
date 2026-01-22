@@ -58,41 +58,17 @@ Once finished, the final event provides the estimated $p$-value and a qualitativ
 The chart visualizes the running $\hat{p}$ alongside fixed threshold lines (0.01 and 0.05), and the curve colour changes based on the current value.
 
 \subsection{Screenshots}
-% images: corrupt, detect_input, detect_p-value, generate_input, generate_output, model_info
-\begin{figure}[H]
+\begin{figure}[t]
     \centering
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{images/generate_input.jpg}
-        \caption{Generation input}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{images/generate_output.jpg}
-        \caption{Generation output with corruption}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{images/corrupt.jpg}
-        \caption{Corruption interface}
-    \end{subfigure}
+    \subfigure[Generation input]{\includegraphics[width=0.45\textwidth]{images/generate_input.jpg}}\hfill
+    \subfigure[Generation output (vanilla)]{\includegraphics[width=0.45\textwidth]{images/generate_output.jpg}}\\[0.9em]
 
-    \vspace{1em}
+    \subfigure[Corruption interface]{\includegraphics[width=0.45\textwidth]{images/corrupt.jpg}}\hfill
+    \subfigure[Detection input]{\includegraphics[width=0.45\textwidth]{images/detect_input.jpg}}\\[0.9em]
 
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{images/detect_input.jpg}
-        \caption{Detection input}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{images/detect_p-value.jpg}
-        \caption{Detection output with running $\hat{p}$ curve}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{images/model_info.jpg}
-        \caption{Model info sidebar}
-    \end{subfigure}
+    \subfigure[Detection output with running $\hat{p}$ curve]{\includegraphics[width=0.45\textwidth]{images/detect_p-value.jpg}}\hfill
+    \subfigure[Model info sidebar]{\includegraphics[width=0.45\textwidth]{images/model_info.jpg}}
 
-    \caption{Frontend screenshots showing the generation and detection interfaces, including the corruption editor and model info sidebar.}
+    \caption{Frontend screenshots showing the generation and detection interfaces, corruption editor, and model information.}
     \label{fig:frontend_screenshots}
 \end{figure}

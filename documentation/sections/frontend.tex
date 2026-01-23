@@ -15,12 +15,12 @@ User-facing settings (active tab, generation settings, and detection settings) a
 This makes it easier to iterate on experiments without repeatedly re-entering parameters such as the watermark key or $n$.
 
 \subsection{Backend Integration and Streaming}
-All API calls are performed using \href{https://developer.mozilla.org/en-US/docs/Web/API/fetch}{\texttt{fetch}}.
+All API calls are performed using \texttt{fetch}.
 The API base URL is configurable via \texttt{VITE\_API\_BASE\_URL}. If it is not set, requests default to \texttt{/api}.
-During development, \href{https://vitejs.dev}{Vite} proxies \texttt{/api/*} to the backend at \texttt{http://localhost:8000} and rewrites the path (see \href{https://vitejs.dev/config/server-options.html#server-proxy}{Vite proxy configuration}), which avoids \href{https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS}{CORS} issues.
+During development, \href{https://vitejs.dev}{Vite} proxies \texttt{/api/*} to the backend at \texttt{http://localhost:8000} and rewrites the path (see \href{https://vitejs.dev/config/server-options.html#server-proxy}{Vite proxy configuration}), which avoids CORS issues.
 
 Generation and detection are implemented as \href{https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events}{server-sent event (SSE) streams}.
-Because both endpoints use HTTP \href{https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST}{\texttt{POST}} (to send JSON settings), the frontend reads the response via a \href{https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream}{\texttt{ReadableStream}} and parses SSE frames manually.
+Because both endpoints use HTTP \texttt{POST} (to send JSON settings), the frontend reads the response via a \texttt{ReadableStream} and parses SSE frames manually.
 The stream is then mapped to UI updates (token-by-token output for generation, and incremental $\hat{p}$ values for detection).
 
 \subsection{Generation}
@@ -61,7 +61,7 @@ The chart visualizes the running $\hat{p}$ alongside fixed threshold lines (0.01
 \begin{figure}[t]
     \centering
     \subfigure[Generation input]{\includegraphics[width=0.45\textwidth]{images/generate_input.jpg}}\hfill
-    \subfigure[Generation output (vanilla)]{\includegraphics[width=0.45\textwidth]{images/generate_output.jpg}}\\[0.9em]
+    \subfigure[Generation output (with vanilla)]{\includegraphics[width=0.45\textwidth]{images/generate_output.jpg}}\\[0.9em]
 
     \subfigure[Corruption interface]{\includegraphics[width=0.45\textwidth]{images/corrupt.jpg}}\hfill
     \subfigure[Detection input]{\includegraphics[width=0.45\textwidth]{images/detect_input.jpg}}\\[0.9em]

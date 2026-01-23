@@ -7,6 +7,7 @@ import type { GenerateResponsePayload, GenerateTokenEvent } from "./generate-sec
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface Props {
 	finalGenerate: GenerateResponsePayload | null;
@@ -53,27 +54,41 @@ export default function GenerateCard({ finalGenerate, generatedTokens, isGenerat
 					<div className="flex items-center gap-2">
 						<span className="text-[11px] font-normal text-slate-400">tokens: {generatedTokens.length}</span>
 
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-7 w-7 border-slate-700 bg-slate-900"
-							onClick={handleCopyGenerated}
-							disabled={!fullGeneratedText}>
-							<Copy className="h-3 w-3" />
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-7 w-7 border-slate-700 bg-slate-900"
+									onClick={handleCopyGenerated}
+									disabled={!fullGeneratedText}>
+									<Copy className="h-3 w-3" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Copy</p>
+							</TooltipContent>
+						</Tooltip>
 
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-7 w-7 border-slate-700 bg-slate-900"
-							onClick={handleBringToDetect}
-							disabled={!fullGeneratedText}>
-							<ArrowRightCircle className="h-3 w-3" />
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-7 w-7 border-slate-700 bg-slate-900"
+									onClick={handleBringToDetect}
+									disabled={!fullGeneratedText}>
+									<ArrowRightCircle className="h-3 w-3" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Bring to Detect</p>
+							</TooltipContent>
+						</Tooltip>
 					</div>
 				</CardTitle>
 
-				{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard ✔</p>}
+				{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard</p>}
 			</CardHeader>
 			<CardContent>
 				<div className="relative min-h-[140px] rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm leading-relaxed">

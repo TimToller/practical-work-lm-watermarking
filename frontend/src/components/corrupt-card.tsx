@@ -8,6 +8,8 @@ import { useMemo, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Textarea } from "./ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function CorruptCard() {
 	const [{ corrupted, original }, setCorrupted] = useAtom(corruptedText);
@@ -69,39 +71,51 @@ export default function CorruptCard() {
 					<div className="flex items-center gap-2">
 						{canShowStats && <span className="text-[11px] font-normal text-slate-400">Similarity: {percent.toFixed(2)}%</span>}
 
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-7 w-7 border-slate-700 bg-slate-900"
-							onClick={handleCopyGenerated}
-							disabled={!corrupted}>
-							<Copy className="h-3 w-3" />
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-7 w-7 border-slate-700 bg-slate-900"
+									onClick={handleCopyGenerated}
+									disabled={!corrupted}>
+									<Copy className="h-3 w-3" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Copy</p>
+							</TooltipContent>
+						</Tooltip>
 
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-7 w-7 border-slate-700 bg-slate-900"
-							onClick={handleBringToDetect}
-							disabled={!corrupted}>
-							<ArrowRightCircle className="h-3 w-3" />
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-7 w-7 border-slate-700 bg-slate-900"
+									onClick={handleBringToDetect}
+									disabled={!corrupted}>
+									<ArrowRightCircle className="h-3 w-3" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Bring to Detect</p>
+							</TooltipContent>
+						</Tooltip>
 					</div>
 				</CardTitle>
 
-				{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard ✔</p>}
+				{copied && <p className="mt-1 text-[11px] text-emerald-300">Copied to clipboard</p>}
 			</CardHeader>
 
 			<CardContent>
-				<div className="relative min-h-60 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm leading-relaxed flex">
-					<textarea
-						name="corrupt-text"
-						className="flex-1 w-full resize-none border-0 bg-transparent font-mono text-slate-300 outline-none align-top min-h-full"
-						value={corrupted ?? ""}
-						onChange={(e) => setCorrupted((prev) => ({ ...prev, corrupted: e.target.value }))}
-						placeholder="Corrupted text will appear here…"
-					/>
-				</div>
+				<Textarea
+					id="corrupt-text"
+					value={corrupted ?? ""}
+					onChange={(e) => setCorrupted((prev) => ({ ...prev, corrupted: e.target.value }))}
+					className="min-h-[120px] resize-y border-slate-700 bg-slate-900"
+					placeholder="Corrupted text will appear here…"
+				/>
 
 				{original && corrupted && (
 					<div className="mt-3">
@@ -127,8 +141,8 @@ export default function CorruptCard() {
 												const cls = p.added
 													? "bg-emerald-500/15 text-emerald-200"
 													: p.removed
-														? "bg-rose-500/15 text-rose-200 line-through decoration-rose-300/60"
-														: "text-slate-300";
+													? "bg-rose-500/15 text-rose-200 line-through decoration-rose-300/60"
+													: "text-slate-300";
 
 												return (
 													<span key={idx} className={cls}>

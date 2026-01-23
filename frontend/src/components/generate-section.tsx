@@ -14,6 +14,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { TabsContent } from "./ui/tabs";
 import { Textarea } from "./ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export type GenerateRequestPayload = {
 	prompt: string;
@@ -142,9 +143,16 @@ export default function GenerateSection() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
-						<Button variant="outline" size="icon" className="h-7 w-7 border-slate-700 bg-slate-900" onClick={shufflePrompt}>
-							<Shuffle className="h-3 w-3" />
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="outline" size="icon" className="h-7 w-7 border-slate-700 bg-slate-900" onClick={shufflePrompt}>
+									<Shuffle className="h-3 w-3" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>Get random prompt</p>
+							</TooltipContent>
+						</Tooltip>
 
 						<Label htmlFor="prompt">Prompt</Label>
 						<Textarea

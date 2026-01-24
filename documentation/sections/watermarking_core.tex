@@ -1,5 +1,41 @@
 
 \section{Watermarking and Detection Core}
 \subsection{Watermark Parameters and their roles}
+This prototype implements an ``exp-min'' watermark for autoregressive language model generation together with a statistical detector. Both algorithms are keyed: a secret integer key deterministically generates a pseudo-random table $\xi$ of values in $[0,1)$ that is used during both generation and detection.
+
+In the backend API, watermarking and detection are controlled by the following parameters:
+\begin{itemize}
+    \item \textbf{Key ($\mathtt{key}$).} Secret seed that defines the watermark. The generator and detector derive the same pseudo-random values from this key; using the wrong key makes the detector behave like it is under the null hypothesis.
+    \item \textbf{Sequence length ($\mathtt{n}$).} The watermark has a periodic structure of length $n$. At generation step $t$, the algorithm uses a row index $r=(\tau+t)\bmod n$; during detection the statistic is minimized over possible cyclic offsets to account for the unknown shift $\tau$.
+    \item \textbf{Generated length ($\mathtt{m}$).} Number of new tokens produced by the watermarked sampler. (This is distinct from $n$, which controls watermark periodicity.)
+    \item \textbf{Detection window ($\mathtt{k}$).} Number of tokens from the analyzed text used in detection (defaults to $m$). Larger $k$ generally increases detection power but costs more computation.
+    \item \textbf{Edit penalty ($\gamma$).} Non-negative penalty used by the detector to allow insertions/deletions in a Levenshtein-style dynamic program. Intuitively, $\gamma$ controls how tolerant detection is to corruptions such as added/removed tokens.
+    \item \textbf{Monte Carlo runs ($\mathtt{n\_runs}$).} Number of random trials used to estimate a p-value under the null. More runs yield a more stable p-value estimate but increase runtime.
+    \item \textbf{Sampling controls (temperature/top-$p$).} Applied to the model logits before watermarked sampling. These affect generation quality and diversity; the watermarking step is applied after these transformations.
+\end{itemize}
+
 \subsection{Generation Algorithm}
+The generation endpoint implements explicit token-by-token decoding using the model backend's full next-token logits. The algorithm can be summarized as follows:
+\begin{enumerate}
+    \item \textbf{Initialize context.} The prompt is tokenized and evaluated once by the model backend to obtain the next-token logits.
+    \item \textbf{Row schedule.} A key-derived shift $\tau\in\{0,\dots,n-1\}$ is computed, and the watermark row used at step $t$ is $r=(\tau+t)\bmod n$.
+    \item \textbf{Compute sampling distribution.} The current logits are converted into probabilities $p$ after applying temperature and optional nucleus (top-$p$) filtering.
+    \item \textbf{Keyed ``randomness'' over the vocabulary.} For the current row $r$, a deterministic vector $u\in[0,1)^V$ is generated over the full vocabulary (where $V$ is the vocabulary size). This vector is derived from the secret key and the row index.
+    \item \textbf{Exp-min choice.} The next token is selected by minimizing an exp-min score
+          \[
+              i^* = \arg\min_i \frac{-\log(u_i)}{\max(p_i,\varepsilon)}
+          \]
+          where $\varepsilon$ is a small constant for numerical stability.
+    \item \textbf{Advance.} The chosen token is appended to the context, evaluated by the model to obtain logits for the next step, and the process repeats for $m$ steps.
+\end{enumerate}
+
 \subsection{Detection Algorithm}
+Detection tests whether a given text is consistent with having been produced by the keyed exp-min sampler.
+
+First, the input text is tokenized and only the first $k$ tokens are used (by default, $k$ is set to the full input length but should ideally be capped for very large inputs). Let the resulting token sequence be $x_1,\dots,x_k$.
+
+The detector constructs a keyed pseudo-random matrix $\xi\in[0,1)^{n\times U}$, where $U$ is the number of unique tokens among the first $k$ tokens. Each entry $\xi_{r,u}$ is deterministically derived from the secret key, the row index $r\in\{0,\dots,n-1\}$, and the token id.
+
+From this it derives costs $w_{r,u}=\log(1-\xi_{r,u})$ (with clipping to avoid $\log(0)$). The core detection statistic is then computed using a Levenshtein-style dynamic program that aligns the observed token sequence against the periodic watermark row sequence. Insertions and deletions cost $\gamma$, while diagonal (match) transitions use the keyed costs $w_{r,u}$. Because the true shift $\tau$ is unknown, the detector minimizes this alignment cost over a set of candidate cyclic offsets.
+
+To turn the statistic into a p-value, the backend uses a Monte Carlo procedure: it repeatedly samples an i.i.d. uniform ``null'' matrix $\xi'$ of the same shape, recomputes the statistic, and counts how often the null statistic is at least as extreme as the observed one. The resulting estimate is reported as a smoothed p-value, and the implementation may early-stop when bounds imply the outcome is certainly ``unlikely'' ($p > 0.05$), ``likely'' ($0.01 < p \leq 0.05$), or ``very likely'' ($p \leq 0.01$).

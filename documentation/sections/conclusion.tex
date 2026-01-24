@@ -1,6 +1,25 @@
-
-
 \section{Conclusion}
 \subsection{Summary of Results}
+The main goal of this project was to build an accessible, interactive demonstration of LLM watermarking that is both responsive on consumer hardware and faithful to the core ideas proposed in the reference approach. We achieved this by implementing a complete, end-to-end workflow with watermarking, detection, and corruption/adversarial editing and exposing it through a simple user interface.
+
+Across typical prompts, the system produces outputs that remain usable and natural while still allowing reliable detection of the watermark. After adversarial editing, the watermark remains measurable under moderate corruption, illustrating the intended robustness-distortion trade-off. Importantly, the prototype also demonstrates that these concepts can be explored even with a comparatively small, locally runnable model, which makes watermarking experimentation more approachable and reproducible.
+
+Overall, the implementation supports the central takeaway: watermarking can be a practical mechanism for signaling likely model-generated text, but it should be treated as a probabilistic indicator rather than a cryptographic proof.
+
 \subsection{Limitations}
-\subsection{Outlook}
+The system still exhibits failure modes in certain cases. We observed situations where the watermark either introduces more distortion than expected or becomes harder to detect even without explicit adversarial editing. These outcomes can depend on multiple interacting factors, including prompt style (open-ended prompts generally perform better), sampling settings, model size/quality, and implementation details that may diverge subtly from the original method.
+
+There are also practical constraints in performance and model choice. Development and testing were primarily done on a lightweight local machine, which limits feasible model sizes and slows inference, especially when running inside containers. As a result, the prototype prioritizes a smooth demo experience over exhaustive evaluation across many model families, decoding strategies, languages, and long-context scenarios.
+
+Finally, the threat model is necessarily limited: determined attackers can apply stronger transformations (paraphrasing, translation, style transfer, or model-based rewriting) that may remove or significantly weaken the watermark. This reinforces that watermarking is best viewed as one component in a broader provenance and misuse-mitigation toolbox.
+
+\subsection{Reproducibility and Practical Use}
+To make the work easier to validate and extend, the system is structured as a self-contained stack with a clear separation between the watermarking core, model backend, and the user-facing interface. The most effective settings found during experimentation are provided as defaults so the demo behaves sensibly out of the box.
+
+In practical deployments, users should explicitly document the assumed threat model, the chosen decoding parameters, and the detection thresholds, since these choices materially affect both distortion and detectability.
+
+\subsection{Future Work and Outlook}
+Several extensions would strengthen both scientific validity and real-world relevance. First, a systematic benchmark suite should be added: standardized prompt sets, multiple languages, long-form generations, and a wider range of corruption operators. Second, the implementation should be evaluated across additional model families and scales to quantify how model quality and sampling strategies affect watermark strength.
+
+With these improvements, the project can evolve from a convincing demonstration into a stronger experimental platform for studying watermarking under realistic conditions.
+

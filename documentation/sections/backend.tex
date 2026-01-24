@@ -4,7 +4,7 @@ The backend is implemented in Python using \texttt{FastAPI}. The main entry poin
 \texttt{backend/app/main.py}, which registers all route modules and configures CORS for the local development
 frontend.
 
-Dependency management is handled via \texttt{uv} (\url{https://docs.astral.sh/uv/}), which provides fast, reproducible
+Dependency management is handled via \href{https://docs.astral.sh/uv/}{\texttt{uv}}, which provides fast, reproducible
 installs and an ergonomic way to run the application (see also the \texttt{backend/Dockerfile} and the project
 \texttt{README.md}).
 
@@ -67,7 +67,7 @@ To evaluate robustness against simple corruption attacks, \texttt{/corrupt} prod
 The original paper evaluates corruption using back-translation. This project initially explored that idea, but the
 translation toolchain significantly increased dependencies and latency. For a lightweight and fast alternative, the
 current endpoint applies randomized word-level mutations (swap/drop/duplicate/replace characters) until the output
-reaches a requested similarity target.
+roughly reaches a requested similarity target. This method isn't as linguistically informed as back-translation, but it serves as a very fast proxy for simple adversarial editing.
 
 The request parameter is \texttt{similarity\_goal} in $[0,1]$: values closer to 1.0 apply little to no corruption, while
 lower values increase the amount of perturbation. Similarity is measured using \texttt{difflib.SequenceMatcher}, and the

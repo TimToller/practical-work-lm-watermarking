@@ -17,7 +17,7 @@ This makes it easier to iterate on experiments without repeatedly re-entering pa
 \subsection{Backend Integration and Streaming}
 All API calls are performed using \texttt{fetch}.
 The API base URL is configurable via \texttt{VITE\_API\_BASE\_URL}. If it is not set, requests default to \texttt{/api}.
-During development, \href{https://vitejs.dev}{Vite} proxies \texttt{/api/*} to the backend at \texttt{http://localhost:8000} and rewrites the path (see \href{https://vitejs.dev/config/server-options.html#server-proxy}{Vite proxy configuration}), which avoids CORS issues.
+Vite proxies \texttt{/api/*} to the backend at \texttt{http://localhost:8000} and rewrites the path (see \href{https://vitejs.dev/config/server-options.html#server-proxy}{Vite proxy configuration}), which avoids CORS issues.
 
 Generation and detection are implemented as \href{https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events}{server-sent event (SSE) streams}.
 Because both endpoints use HTTP \texttt{POST} (to send JSON settings), the frontend reads the response via a \texttt{ReadableStream} and parses SSE frames manually.
@@ -57,18 +57,46 @@ The frontend collects intermediate \emph{comparing} progress events, each contri
 Once finished, the final event provides the estimated $p$-value and a qualitative label (\emph{very likely}, \emph{likely}, or \emph{unlikely} watermarked).
 The chart visualizes the running $\hat{p}$ alongside fixed threshold lines (0.01 and 0.05), and the curve colour changes based on the current value.
 
+\cleardoubleoddpage
 \subsection{Screenshots}
-\begin{figure}[t]
+\begin{figure}[H]
     \centering
-    \subfigure[Generation input]{\includegraphics[width=0.45\textwidth]{images/generate_input.jpg}}\hfill
-    \subfigure[Generation output (with vanilla)]{\includegraphics[width=0.45\textwidth]{images/generate_output.jpg}}\\[0.9em]
-
-    \subfigure[Corruption interface]{\includegraphics[width=0.45\textwidth]{images/corrupt.jpg}}\hfill
-    \subfigure[Detection input]{\includegraphics[width=0.45\textwidth]{images/detect_input.jpg}}\\[0.9em]
-
-    \subfigure[Detection output with running $\hat{p}$ curve]{\includegraphics[width=0.45\textwidth]{images/detect_p-value.jpg}}\hfill
-    \subfigure[Model info sidebar]{\includegraphics[width=0.45\textwidth]{images/model_info.jpg}}
-
-    \caption{Frontend screenshots showing the generation and detection interfaces, corruption editor, and model information.}
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{images/generate_input.jpg}
+        \caption{Generation input}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{images/generate_output.jpg}
+        \caption{Generation output (with vanilla output)}
+    \end{subfigure}
     \label{fig:frontend_screenshots}
 \end{figure}
+
+\begin{figure}[H]
+    \ContinuedFloat
+    \captionsetup{list=off}
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{images/corrupt.jpg}
+        \caption{Corruption interface}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{images/model_info.jpg}
+        \caption{Model info sidebar}
+    \end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+    \ContinuedFloat
+    \captionsetup{list=off}
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{images/detect_input.jpg}
+        \caption{Detection input}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{images/detect_p-value.jpg}
+        \caption{Detection output with running $\hat{p}$ curve}
+    \end{subfigure}\hfill
+\end{figure}
+

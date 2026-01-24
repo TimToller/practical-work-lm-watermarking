@@ -1,6 +1,34 @@
 
 \section{Setup and Usage}
 \subsection{Requirements and Installation }
+There are two main ways to run the project:
+
+\begin{enumerate}
+    \item using Docker Compose to start the full stack as containers
+    \item starting the backend and frontend separately for development
+\end{enumerate}
+
+More detailed, step-by-step instructions are provided in \texttt{README.md}.
+
+For the recommended setup, we use Docker and Docker Compose because it provides easier deployment and consistent dependency management across different machines (no local Python/Node toolchains are required).
+
+In addition to the container runtime, a local GGUF model file is required.
+The default configuration expects the model to be available at:
+\texttt{backend/models/llama-3.2-3b-instruct-q4\_k\_m.gguf}.
+If a different filename is used, the environment variable \texttt{MODEL\_PATH} must be updated accordingly.
+
+Prerequisites:
+\begin{itemize}
+    \item Docker and Docker Compose
+    \item A downloaded GGUF \href{https://huggingface.co/hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF/resolve/main/llama-3.2-3b-instruct-q4_k_m.gguf?download=true}{model} placed in \texttt{backend/models/}
+\end{itemize}
+
 \subsection{Running as a Docker Compose Container}
+The production-like setup can be started with:
+\texttt{docker compose up --build}.
+This launches both services and configures the frontend to proxy API requests under \texttt{/api} to the backend.
+The default ports are \texttt{8080} for the frontend and \texttt{8000} for the backend API.
+
 \subsection{Running for Development}
-\subsection{Example Requests and Expected Outputs}
+For local development without containers, the backend can be run with Python (via \texttt{uv}) and the frontend with Node.js (via \texttt{pnpm}).
+This mode is useful for rapid iteration (hot reload), but requires the corresponding toolchains to be installed locally.

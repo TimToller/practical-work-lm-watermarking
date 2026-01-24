@@ -23,8 +23,10 @@ def _detect_iter(req, llm) -> Iterator[Dict[str, Any]]:
     tokens = np.array(llm.tokenize(req.text), dtype=np.int32)
     m = int(tokens.shape[0])
 
-    k = int(req.k) if req.k is not None else min(m, 128)
-    k = min(k, m)
+    if req.k is None:
+        k = m  # default: use all tokens
+    else:
+        k = min(int(req.k), m)
 
     vocab_size = int(llm.vocab_size)
     n = int(req.n)

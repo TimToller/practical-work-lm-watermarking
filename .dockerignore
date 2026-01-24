@@ -24,3 +24,5 @@ frontend/.nuxt/
 
 # OS / editor
 .DS_Store
+
+documentation/

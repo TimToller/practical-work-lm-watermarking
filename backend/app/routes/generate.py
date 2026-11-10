@@ -12,7 +12,6 @@ from fastapi.responses import StreamingResponse
 from backend.app.schemas import GenerateRequest, GenerateResponse
 from backend.app.deps import get_backend
 from backend.model.backend import ModelBackend
-from backend.core.random_util import RandomGenerator
 
 from backend.core.xi import xi_u_vector
 import hashlib
@@ -64,29 +63,10 @@ def _watermarked_generate_iter(
     vanilla_text: str | None = None
     vanilla_ids: T.List[int] | None = None
 
-    if req.return_vanilla:
-        vanilla_len = int(req.vanilla_m or req.m)
-        vanilla_text_only = llm.completion(
-            prompt=PROMPT_WRAPPER(req.prompt),
-            max_tokens=vanilla_len,
-            temperature=float(req.temperature),
-            top_p=float(req.top_p),
-        )
-        vanilla_text = vanilla_text_only
-        try:
-            vanilla_ids = llm.tokenize(vanilla_text)
-        except Exception:
-            vanilla_ids = []
-
     llm.reset()
 
     t0 = time.time()
     V = llm.vocab_size
-
-    rng = RandomGenerator(req.key)
-    xi = np.array([rng.rand() for _ in range(req.n * V)], dtype=np.float32).reshape(
-        req.n, V
-    )
 
     prompt_tokens: T.List[int] = llm.tokenize(req.prompt)
     token_ids: T.List[int] = list(prompt_tokens)
@@ -149,6 +129,19 @@ def _watermarked_generate_iter(
     cont_tokens = token_ids[prompt_offset:]
     wm_text = llm.detokenize(cont_tokens)
     wm_tokens_out = cont_tokens
+
+    if req.return_vanilla:
+        vanilla_text = llm.completion(
+            prompt=PROMPT_WRAPPER(req.prompt),
+            max_tokens=int(req.vanilla_m or req.m),
+            temperature=float(req.temperature),
+            top_p=float(req.top_p),
+        )
+        try:
+            vanilla_ids = llm.tokenize(vanilla_text)
+        except Exception:
+            vanilla_ids = []
+        llm.reset()
 
     vanilla_text = llm.detokenize(vanilla_ids) if vanilla_ids is not None else None
     elapsed = time.time() - t0

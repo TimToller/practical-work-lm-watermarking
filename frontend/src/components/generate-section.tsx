@@ -268,6 +268,15 @@ export default function GenerateSection() {
 						</Button>
 					</div>
 
+					{isGenerating && (
+						<p role="status" className="text-xs text-slate-400">
+							{generatedTokens.length === 0
+								? "Preparing generation and waiting for the first token…"
+								: returnVanilla && generatedTokens.length >= m
+									? "Watermarked text complete. Generating the baseline…"
+									: `Generating watermarked text: ${generatedTokens.length}/${m} tokens…`}
+						</p>
+					)}
 					{generateError && <p className="text-xs text-red-400">{generateError}</p>}
 
 					{finalGenerate?.warning && !finalGenerate.error && <p className="text-xs text-amber-300">⚠ {finalGenerate.warning}</p>}
